@@ -19,6 +19,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
@@ -40,6 +41,9 @@ public class ModHUDOverlay {
     private final Minecraft mc = Minecraft.getInstance();
     private final ResourceLocation ICONS = WResourceLocation.mod("textures/gui/hud.png");
     protected static final ResourceLocation WIDGETS_TEX_PATH = WResourceLocation.mc("textures/gui/widgets.png");
+    private final ResourceLocation CLAW_SLOT_LEFT_TEX = WResourceLocation.mod("textures/gui/claw_slot_left.png");
+    private final ResourceLocation CLAW_SLOT_RIGHT_TEX = WResourceLocation.mod("textures/gui/claw_slot_right.png");
+    private static final ResourceLocation HOTBAR_SELECTION_SPRITE = ResourceLocation.withDefaultNamespace("hud/hotbar_selection");
 
     private int screenColor = 0;
     private int screenPercentage = 0;
@@ -58,12 +62,13 @@ public class ModHUDOverlay {
             return;
         }
 
-        FactionPlayerHandler.getCurrentFactionPlayer(mc.player).filter(WerewolfPlayer.class::isInstance).ifPresentOrElse(player -> this.handleScreenColorWerewolf(((WerewolfPlayer) player)), () -> {
-            this.screenPercentage = 0;
-            this.attackTargetScreenPercentage = 0;
-            this.waitTicks = 0;
-            this.entities.clear();
-        });
+        FactionPlayerHandler.getCurrentFactionPlayer(mc.player).filter(WerewolfPlayer.class::isInstance)
+                .ifPresentOrElse(player -> this.handleScreenColorWerewolf(((WerewolfPlayer) player)), () -> {
+                    this.screenPercentage = 0;
+                    this.attackTargetScreenPercentage = 0;
+                    this.waitTicks = 0;
+                    this.entities.clear();
+                });
     }
 
     @SubscribeEvent
@@ -96,18 +101,25 @@ public class ModHUDOverlay {
     private void renderClawSlot(GuiGraphics graphics, WerewolfPlayer player, ItemStack claw) {
         int width = this.mc.getWindow().getGuiScaledWidth();
         int height = this.mc.getWindow().getGuiScaledHeight();
-        // place the dedicated "10th" slot just to the right of the vanilla hotbar (half width = 91)
-        int x = width / 2 + 91 + 6;
-        int y = height - 19;
-        // slot background
-        graphics.fill(x - 1, y - 1, x + 17, y + 17, 0x90000000);
-        graphics.renderItem(claw, x, y);
-        graphics.renderItemDecorations(this.mc.font, claw, x, y);
-        // cooldown/duration progress bar below the slot
-        float perc = player.getActionHandler().getPercentageForAction(ModActions.CLAW.get());
-        int filled = (int) (Math.min(1f, Math.abs(perc)) * 16);
-        graphics.fill(x, y + 17, x + 16, y + 19, 0xFF555555);
-        graphics.fill(x, y + 17, x + filled, y + 19, perc < 0 ? 0xFFCC3333 : 0xFF33CC33);
+        int center = width / 2;
+        // side follows the main arm: claw sits on the same side as the player's main hand
+        boolean effectiveLeft = this.mc.player.getMainArm() == HumanoidArm.LEFT;
+        int texX;
+        int itemX;
+        if (effectiveLeft) {
+            texX = center - 91 - 29;
+            itemX = texX + 3;
+            graphics.blit(CLAW_SLOT_LEFT_TEX, texX, height - 23, 0.0F, 0.0F, 29, 24, 29, 24);
+        } else {
+            texX = center + 91;
+            itemX = texX + 9;
+            graphics.blit(CLAW_SLOT_RIGHT_TEX, texX, height - 23, 0.0F, 0.0F, 29, 24, 29, 24);
+        }
+        int itemY = height - 19;
+        // permanent selection highlight while the claw action is active
+        graphics.blitSprite(HOTBAR_SELECTION_SPRITE, itemX - 4, itemY - 4, 24, 23);
+        graphics.renderItem(claw, itemX, itemY);
+        graphics.renderItemDecorations(this.mc.font, claw, itemX, itemY);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -135,8 +147,8 @@ public class ModHUDOverlay {
             if (!OptifineHandler.isShaders()) {
                 event.getGuiGraphics().fillGradient(0, h - bh, w, h, 0x00000000, color);
             }
-//            this.fillGradient2(stack, 0, 0, bw, h, 0x000000, color);
-//            this.fillGradient2(stack, w - bw, 0, w, h, color, 0x00);
+            // this.fillGradient2(stack, 0, 0, bw, h, 0x000000, color);
+            // this.fillGradient2(stack, w - bw, 0, w, h, color, 0x00);
 
             stack.popPose();
         }
@@ -191,16 +203,20 @@ public class ModHUDOverlay {
             }
         }
         graphics.setColor(1f, 1f, 1f, 1f);
-        graphics.blit(ICONS, left, top, silver ? 30 : 15, 0, 15, 15, 256, 256);//other option is 18x18 - 307x307
+        graphics.blit(ICONS, left, top, silver ? 30 : 15, 0, 15, 15, 256, 256);// other option is 18x18 - 307x307
     }
 
     private void renderCrosshair(RenderGuiLayerEvent.Pre event) {
-        if (WerewolvesConfig.CLIENT.disableFangCrosshairRendering.get()) return;
+        if (WerewolvesConfig.CLIENT.disableFangCrosshairRendering.get())
+            return;
         if (Helper.isWerewolf(this.mc.player)) {
             HitResult result = Minecraft.getInstance().hitResult;
-            LivingEntity entity = result instanceof EntityHitResult entityResult ? entityResult.getEntity() instanceof LivingEntity living ? living : null : null;
+            LivingEntity entity = result instanceof EntityHitResult entityResult
+                    ? entityResult.getEntity() instanceof LivingEntity living ? living : null
+                    : null;
             if (entity != null && WerewolfPlayer.get(mc.player).canBite()) {
-                renderFangs(event.getGuiGraphics(), this.mc.getWindow().getGuiScaledWidth(), this.mc.getWindow().getGuiScaledHeight(), entity);
+                renderFangs(event.getGuiGraphics(), this.mc.getWindow().getGuiScaledWidth(),
+                        this.mc.getWindow().getGuiScaledHeight(), entity);
                 event.setCanceled(true);
             }
         }
