@@ -119,6 +119,8 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
 
     private final WerewolfInventory inventory = new WerewolfInventory(this);
 
+    private final WerewolfClawSlot clawSlot = new WerewolfClawSlot();
+
     private int sleepTimer;
 
     public WerewolfPlayer(@Nonnull Player player) {
@@ -143,6 +145,18 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
 
     public WerewolfInventory getInventory() {
         return inventory;
+    }
+
+    public WerewolfClawSlot getClawSlot() {
+        return clawSlot;
+    }
+
+    public void syncClawSlot() {
+        if (!isRemote()) {
+            CompoundTag nbt = new CompoundTag();
+            nbt.put(this.clawSlot.nbtKey(), this.clawSlot.serializeUpdateNBT(this.player.registryAccess()));
+            this.sync(nbt, false);
+        }
     }
 
     public void switchForm(WerewolfForm form) {
@@ -549,6 +563,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public @NotNull CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag compound = super.serializeNBT(provider);
         compound.put(this.inventory.nbtKey(), this.inventory.serializeNBT(provider));
+        compound.put(this.clawSlot.nbtKey(), this.clawSlot.serializeNBT(provider));
         compound.put(this.skillHandler.nbtKey(), this.skillHandler.serializeNBT(provider));
         compound.put(this.actionHandler.nbtKey(), this.actionHandler.serializeNBT(provider));
         compound.put(this.levelHandler.nbtKey(), this.levelHandler.serializeNBT(provider));
@@ -566,6 +581,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public @NotNull CompoundTag serializeUpdateNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = super.serializeUpdateNBT(provider);
         nbt.put(this.inventory.nbtKey(), this.inventory.serializeUpdateNBT(provider));
+        nbt.put(this.clawSlot.nbtKey(), this.clawSlot.serializeUpdateNBT(provider));
         nbt.put(this.skillHandler.nbtKey(), this.skillHandler.serializeUpdateNBT(provider));
         nbt.put(this.actionHandler.nbtKey(), this.actionHandler.serializeUpdateNBT(provider));
         nbt.put(this.levelHandler.nbtKey(), this.levelHandler.serializeUpdateNBT(provider));
@@ -580,6 +596,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public void deserializeNBT(HolderLookup.Provider provider, @NotNull CompoundTag nbt) {
         super.deserializeNBT(provider, nbt);
         this.inventory.deserializeNBT(provider, nbt.getCompound(this.inventory.nbtKey()));
+        this.clawSlot.deserializeNBT(provider, nbt.getCompound(this.clawSlot.nbtKey()));
         this.skillHandler.deserializeNBT(provider, nbt.getCompound(this.skillHandler.nbtKey()));
         this.actionHandler.deserializeNBT(provider, nbt.getCompound(this.actionHandler.nbtKey()));
         this.levelHandler.deserializeNBT(provider, nbt.getCompound(this.levelHandler.nbtKey()));
@@ -597,6 +614,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public void deserializeUpdateNBT(HolderLookup.Provider provider, @NotNull CompoundTag nbt) {
         super.deserializeUpdateNBT(provider, nbt);
         this.inventory.deserializeUpdateNBT(provider, nbt.getCompound(this.inventory.nbtKey()));
+        this.clawSlot.deserializeUpdateNBT(provider, nbt.getCompound(this.clawSlot.nbtKey()));
         this.skillHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.skillHandler.nbtKey()));
         this.actionHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.actionHandler.nbtKey()));
         this.levelHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.levelHandler.nbtKey()));
@@ -625,6 +643,13 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
 
     public void checkToolDamage(@NotNull ItemStack from, @NotNull ItemStack itemInHand, boolean forceCalculation) {
         AttributeInstance attribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (this.clawSlot.isActive()) {
+            // the claw action supplies its own attack damage modifier while active; suppress the passive claws modifier
+            if (attribute != null) {
+                attribute.removeModifier(CLAWS);
+            }
+            return;
+        }
         if (this.getLevel() > 0 && this.form.isTransformed() && itemInHand.isEmpty()) {
             if (!from.isEmpty() || forceCalculation) {
                 float damage = WerewolvesConfig.BALANCE.PLAYER.werewolf_claw_damage.get().floatValue();

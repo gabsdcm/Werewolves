@@ -74,6 +74,42 @@ public class ModHUDOverlay {
         this.renderCrosshair(event);
     }
 
+    @SubscribeEvent
+    public void onRenderHotbar(RenderGuiLayerEvent.Pre event) {
+        if (mc.player == null || !mc.player.isAlive() || !VanillaGuiLayers.HOTBAR.equals(event.getName())) {
+            return;
+        }
+        if (!Helper.isWerewolf(mc.player)) {
+            return;
+        }
+        WerewolfPlayer player = WerewolfPlayer.get(mc.player);
+        if (!player.getActionHandler().isActionActive(ModActions.CLAW.get())) {
+            return;
+        }
+        ItemStack claw = player.getClawSlot().getStack();
+        if (claw.isEmpty()) {
+            return;
+        }
+        this.renderClawSlot(event.getGuiGraphics(), player, claw);
+    }
+
+    private void renderClawSlot(GuiGraphics graphics, WerewolfPlayer player, ItemStack claw) {
+        int width = this.mc.getWindow().getGuiScaledWidth();
+        int height = this.mc.getWindow().getGuiScaledHeight();
+        // place the dedicated "10th" slot just to the right of the vanilla hotbar (half width = 91)
+        int x = width / 2 + 91 + 6;
+        int y = height - 19;
+        // slot background
+        graphics.fill(x - 1, y - 1, x + 17, y + 17, 0x90000000);
+        graphics.renderItem(claw, x, y);
+        graphics.renderItemDecorations(this.mc.font, claw, x, y);
+        // cooldown/duration progress bar below the slot
+        float perc = player.getActionHandler().getPercentageForAction(ModActions.CLAW.get());
+        int filled = (int) (Math.min(1f, Math.abs(perc)) * 16);
+        graphics.fill(x, y + 17, x + 16, y + 19, 0xFF555555);
+        graphics.fill(x, y + 17, x + filled, y + 19, perc < 0 ? 0xFFCC3333 : 0xFF33CC33);
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRenderWorldLast(RenderGuiEvent.Pre event) {
         int percentages = 0;

@@ -55,6 +55,7 @@ public class ModSkills {
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> HEALTH_AFTER_KILL = SKILLS.register("health_after_kill", () -> new SimpleWerewolfSkill(1, true));
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> HOWLING = SKILLS.register("howling", () -> new ActionSkill<>(ModActions.HOWLING, Trees.LEVEL, true));
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> SENSE = SKILLS.register("sense", () -> new ActionSkill<>(ModActions.SENSE, Trees.LEVEL, true));
+    public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> CLAW = SKILLS.register("claw", () -> new ActionSkill<>(ModActions.CLAW, Trees.LEVEL, true));
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> SPEED = SKILLS.register("speed", () -> new SimpleWerewolfSkill.AttributeSkill(true, Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.ADD_VALUE, player -> WerewolvesConfig.BALANCE.SKILLS.speed_amount.get()));
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> JUMP = SKILLS.register("jump", () -> new SimpleWerewolfSkill(true));
     public static final DeferredHolder<ISkill<?>, ISkill<IWerewolfPlayer>> LEAP = SKILLS.register("leap", () -> new ActionSkill<>(ModActions.LEAP, Trees.LEVEL, true));
@@ -93,6 +94,7 @@ public class ModSkills {
         public static final ResourceKey<ISkillNode> BEAST1 = node("beast1");
         public static final ResourceKey<ISkillNode> BEAST2 = node("beast2");
         public static final ResourceKey<ISkillNode> BEAST3_1 = node("beast3_1");
+        public static final ResourceKey<ISkillNode> CLAW = node("claw");
         public static final ResourceKey<ISkillNode> BEAST3 = node("beast3");
         public static final ResourceKey<ISkillNode> BEAST4 = node("beast4");
         public static final ResourceKey<ISkillNode> BEAST5 = node("beast5");
@@ -131,6 +133,7 @@ public class ModSkills {
             context.register(BEAST1, new SkillNode(ModSkills.RAGE));
             context.register(BEAST2, new SkillNode(ModSkills.BEAST_FORM));
             context.register(BEAST3_1, new SkillNode(ModSkills.DAMAGE));
+            context.register(CLAW, new SkillNode(ModSkills.CLAW));
             context.register(BEAST3, new SkillNode(ModSkills.THICK_FUR));
             context.register(BEAST4, new SkillNode(ModSkills.STUN_BITE, ModSkills.BLEEDING_BITE));
             context.register(BEAST5, new SkillNode(ModSkills.HEALTH_AFTER_KILL));

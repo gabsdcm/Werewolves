@@ -157,6 +157,16 @@ public class BalanceConfig {
         public final ModConfigSpec.IntValue rage_cooldown;
         public final ModConfigSpec.DoubleValue rage_bite_damage;
 
+        //claw action
+        public final ModConfigSpec.BooleanValue claw_enabled;
+        public final ModConfigSpec.IntValue claw_cooldown;
+        public final ModConfigSpec.DoubleValue claw_normal_attack_damage;
+        public final ModConfigSpec.DoubleValue claw_enhanced_attack_damage;
+        public final ModConfigSpec.DoubleValue claw_ultimate_attack_damage;
+        public final ModConfigSpec.DoubleValue claw_normal_attack_speed;
+        public final ModConfigSpec.DoubleValue claw_enhanced_attack_speed;
+        public final ModConfigSpec.DoubleValue claw_ultimate_attack_speed;
+
         //sense action
         public final ModConfigSpec.BooleanValue sense_enabled;
         public final ModConfigSpec.IntValue sense_radius;
@@ -286,6 +296,17 @@ public class BalanceConfig {
             this.rage_duration_level_increase = builder.comment("The duration is increased each level by this value","In seconds").defineInRange("rage_duration_level_increase", 2, 0, Integer.MAX_VALUE);
             this.rage_cooldown = builder.comment("In seconds").defineInRange("rage_cooldown", 60, 0, Integer.MAX_VALUE);
             this.rage_bite_damage = builder.defineInRange("rage_bite_damage", 4, 0, Double.MAX_VALUE);
+            builder.pop();
+
+            builder.push("claw");
+            this.claw_enabled = builder.define("claw_enabled", true);
+            this.claw_cooldown = builder.comment("In seconds").defineInRange("claw_cooldown", 3, 0, Integer.MAX_VALUE);
+            this.claw_normal_attack_damage = builder.comment("Attack damage modifier of the normal claw").defineInRange("claw_normal_attack_damage", 4.0, 0, Double.MAX_VALUE);
+            this.claw_enhanced_attack_damage = builder.comment("Attack damage modifier of the enhanced claw").defineInRange("claw_enhanced_attack_damage", 7.0, 0, Double.MAX_VALUE);
+            this.claw_ultimate_attack_damage = builder.comment("Attack damage modifier of the ultimate claw").defineInRange("claw_ultimate_attack_damage", 10.0, 0, Double.MAX_VALUE);
+            this.claw_normal_attack_speed = builder.comment("Attack speed modifier of the normal claw").defineInRange("claw_normal_attack_speed", -2.4, -4.0, 4.0);
+            this.claw_enhanced_attack_speed = builder.comment("Attack speed modifier of the enhanced claw").defineInRange("claw_enhanced_attack_speed", -2.0, -4.0, 4.0);
+            this.claw_ultimate_attack_speed = builder.comment("Attack speed modifier of the ultimate claw").defineInRange("claw_ultimate_attack_speed", -1.6, -4.0, 4.0);
             builder.pop();
 
             builder.push("sense");

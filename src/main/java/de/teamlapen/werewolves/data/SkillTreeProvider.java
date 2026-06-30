@@ -35,7 +35,9 @@ public class SkillTreeProvider extends de.teamlapen.vampirism.data.provider.pare
                                                                 )
                                                         )
                                                 ),
-                                                new SkillTreeConfiguration.SkillTreeNodeConfiguration(nodes.getOrThrow(ModSkills.Nodes.BEAST3_1))
+                                                new SkillTreeConfiguration.SkillTreeNodeConfiguration(nodes.getOrThrow(ModSkills.Nodes.BEAST3_1),
+                                                        new SkillTreeConfiguration.SkillTreeNodeConfiguration(nodes.getOrThrow(ModSkills.Nodes.CLAW))
+                                                )
                                         )
                                 ),
                                 new SkillTreeConfiguration.SkillTreeNodeConfiguration(nodes.getOrThrow(ModSkills.Nodes.SURVIVAL1),

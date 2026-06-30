@@ -122,6 +122,9 @@ public class ModItems {
     public static final DeferredItem<WolfPeltArmorItem> WHITE_PELT_CHESTPLATE = register("white_pelt_chestplate", () -> new WolfPeltArmorItem(ModArmorMaterials.WHITE_PELT, ArmorItem.Type.CHESTPLATE, IItemWithTier.TIER.ULTIMATE));
     public static final DeferredItem<WolfPeltArmorItem> WHITE_PELT_LEGGINGS = register("white_pelt_leggings", () -> new WolfPeltArmorItem(ModArmorMaterials.WHITE_PELT, ArmorItem.Type.LEGGINGS, IItemWithTier.TIER.ULTIMATE));
     public static final DeferredItem<WolfPeltArmorItem> WHITE_PELT_BOOTS = register("white_pelt_boots", () -> new WolfPeltArmorItem(ModArmorMaterials.WHITE_PELT, ArmorItem.Type.BOOTS, IItemWithTier.TIER.ULTIMATE));
+    public static final DeferredItem<WerewolfClawItem> WEREWOLF_CLAW_NORMAL = register("werewolf_claw_normal", () -> new WerewolfClawItem(IItemWithTier.TIER.NORMAL));
+    public static final DeferredItem<WerewolfClawItem> WEREWOLF_CLAW_ENHANCED = register("werewolf_claw_enhanced", () -> new WerewolfClawItem(IItemWithTier.TIER.ENHANCED));
+    public static final DeferredItem<WerewolfClawItem> WEREWOLF_CLAW_ULTIMATE = register("werewolf_claw_ultimate", () -> new WerewolfClawItem(IItemWithTier.TIER.ULTIMATE));
     public static final DeferredItem<SmithingTemplateItem> WHITE_PELT_UPGRADE_SMITHING_TEMPLATE = register("white_pelt_upgrade_smithing_template", ModSmithingTemplates::createWhitePeltUpgradeTemplate);
     public static final DeferredItem<Item> WOLFSBANE_FINDER = register("wolfsbane_finder", () -> new Item(props().rarity(Rarity.RARE)));
 

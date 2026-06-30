@@ -30,6 +30,11 @@
                       "node": "werewolves:werewolf/beast3"
                     },
                     {
+                      "children": [
+                        {
+                          "node": "werewolves:werewolf/claw"
+                        }
+                      ],
                       "node": "werewolves:werewolf/beast3_1"
                     }
                   ],

@@ -245,6 +245,12 @@ public class LootTablesGenerator {
                             .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.05f, 0.025f))
                             .add(LootItem.lootTableItem(ModItems.V.VAMPIRE_BOOK.get()).apply(AddBookNbtFunction.builder()).setWeight(1))
                     )
+                    .withPool(LootPool.lootPool()
+                            .name("werewolf_claw_ultimate")
+                            .when(LootItemKilledByPlayerCondition.killedByPlayer())
+                            .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.025f, 0.015f))
+                            .add(LootItem.lootTableItem(ModItems.WEREWOLF_CLAW_ULTIMATE.get()))
+                    )
             );
         }
 

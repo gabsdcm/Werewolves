@@ -21,6 +21,7 @@ public class ModActions {
     public static final DeferredHolder<IAction<?>, FearAction> FEAR = ACTIONS.register("fear", FearAction::new);
     public static final DeferredHolder<IAction<?>, LeapAction> LEAP = ACTIONS.register("leap", LeapAction::new);
     public static final DeferredHolder<IAction<?>, HideNameAction> HIDE_NAME = ACTIONS.register("hide_name", HideNameAction::new);
+    public static final DeferredHolder<IAction<?>, ClawAction> CLAW = ACTIONS.register("claw", ClawAction::new);
 
     static void register(IEventBus bus) {
         ACTIONS.register(bus);

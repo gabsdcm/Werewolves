@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "item": "werewolves:cracked_bone"
+    },
+    "P": {
+      "item": "werewolves:pelt"
+    },
+    "S": {
+      "tag": "c:ingots/silver"
+    }
+  },
+  "pattern": [
+    "S S",
+    "B B",
+    "P P"
+  ],
+  "result": {
+    "count": 1,
+    "id": "werewolves:werewolf_claw_normal"
+  }
+}
