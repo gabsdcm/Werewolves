@@ -8,6 +8,7 @@
     "BlockFamiliesAccessor",
     "FoodStatsAccessor",
     "GoalSelectorAccessor",
+    "InventoryContainerMenuMixin",
     "LivingEntityAccessor",
     "MobEffectInstanceAccessor",
     "NearestAttackabletargetGoalAccessor",
@@ -18,16 +19,20 @@
     "SmithingTemplateItemAccessor",
     "SuspiciousStewItemMixin",
     "TargetingConditionsAccessor",
+    "VampirismMenuMixin",
     "VanillaBlockLootAccessor",
     "entity.CatMixin",
+    "entity.InventoryMixin",
     "entity.LivingEntityMixin",
     "entity.MixinVillagerEntity",
     "entity.MobMixin",
     "entity.PlayerAccessor",
-    "entity.PlayerEntityMixin"
+    "entity.PlayerEntityMixin",
+    "network.ServerGamePacketListenerImplMixin"
   ],
   "client": [
     "client.ClientModLoaderAccessor",
+    "client.GuiMixin",
     "client.ItemInHandRendererMixin",
     "client.LayerRendererAccessor",
     "client.LevelRendererMixin",
@@ -37,6 +42,7 @@
     "client.PlayerRendererMixin",
     "client.RenderTypeAccessor",
     "client.ScreenMixin",
+    "client.VampirismContainerScreenMixin",
     "client.modcompat.epicfight.EpicFightRenderEngineMixin"
   ],
   "minVersion": "0.8.5"

@@ -17,6 +17,14 @@ public class ServerPayloadHandler {
             if (msg.action() == ServerboundSimpleInputEventPacket.Action.LEAP) {
                 WerewolfPlayer werewolf = WerewolfPlayer.get(context.player());
                 werewolf.getActionHandler().toggleAction(ModActions.LEAP.get(), new ActionHandler.ActivationContext());
+            } else if (msg.action() == ServerboundSimpleInputEventPacket.Action.CLAW) {
+                WerewolfPlayer werewolf = WerewolfPlayer.get(context.player());
+                werewolf.getActionHandler().toggleAction(ModActions.CLAW.get(), new ActionHandler.ActivationContext());
+            } else if (msg.action() == ServerboundSimpleInputEventPacket.Action.CLAW_EXIT) {
+                WerewolfPlayer werewolf = WerewolfPlayer.get(context.player());
+                if (werewolf.getActionHandler().isActionActive(ModActions.CLAW.get())) {
+                    werewolf.getActionHandler().toggleAction(ModActions.CLAW.get(), new ActionHandler.ActivationContext());
+                }
             }
         });
     }

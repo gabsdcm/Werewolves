@@ -19,10 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Toggle action that equips a {@link WerewolfClawItem} into the dedicated {@link WerewolfClawSlot}
- * and applies tier based attack damage / attack speed modifiers while active.
- */
 public class ClawAction extends DefaultWerewolfAction implements ILastingAction<IWerewolfPlayer>, IActionCooldownMenu {
 
     @Override
@@ -54,7 +50,7 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         WerewolfClawSlot slot = player.getClawSlot();
         Inventory inventory = player.getRepresentingPlayer().getInventory();
 
-        // auto-equip: move (and possibly swap) the best available claw from the inventory into the slot
+        // auto-equip: move the best available claw from the inventory into the slot
         int index = findBestClawIndex(inventory, slot.getStack());
         if (index >= 0) {
             ItemStack inventoryClaw = inventory.getItem(index);
@@ -68,7 +64,8 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         }
         slot.setActive(true);
         applyModifiers(player);
-        player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(), player.getRepresentingPlayer().getMainHandItem(), true);
+        player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(),
+                player.getRepresentingPlayer().getMainHandItem(), true);
         player.syncClawSlot();
         return true;
     }
@@ -78,13 +75,13 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         WerewolfPlayer player = (WerewolfPlayer) werewolf;
         removeModifiers(player);
         player.getClawSlot().setActive(false);
-        player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(), player.getRepresentingPlayer().getMainHandItem(), true);
+        player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(),
+                player.getRepresentingPlayer().getMainHandItem(), true);
         player.syncClawSlot();
     }
 
     @Override
     public void onReActivated(IWerewolfPlayer werewolf) {
-        // transient modifiers are lost on relog -> reapply from the tier stored in the slot
         applyModifiers((WerewolfPlayer) werewolf);
     }
 
@@ -114,7 +111,7 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
 
     @Override
     public boolean showHudDuration(Player player) {
-        return true;
+        return false;
     }
 
     private void applyModifiers(WerewolfPlayer player) {
@@ -126,11 +123,13 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         AttributeInstance speed = player.asEntity().getAttribute(Attributes.ATTACK_SPEED);
         if (damage != null) {
             damage.removeModifier(damageId());
-            damage.addTransientModifier(new AttributeModifier(damageId(), getAttackDamage(tier), AttributeModifier.Operation.ADD_VALUE));
+            damage.addTransientModifier(
+                    new AttributeModifier(damageId(), getAttackDamage(tier), AttributeModifier.Operation.ADD_VALUE));
         }
         if (speed != null) {
             speed.removeModifier(speedId());
-            speed.addTransientModifier(new AttributeModifier(speedId(), getAttackSpeed(tier), AttributeModifier.Operation.ADD_VALUE));
+            speed.addTransientModifier(
+                    new AttributeModifier(speedId(), getAttackSpeed(tier), AttributeModifier.Operation.ADD_VALUE));
         }
     }
 
@@ -153,7 +152,6 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         return null;
     }
 
-    // cached lazily on first use: the registry must already be populated, which is guaranteed once an action runs
     private ResourceLocation damageId;
     private ResourceLocation speedId;
 
@@ -187,14 +185,9 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         };
     }
 
-    /**
-     * @return the inventory index of a claw that is strictly better than the current slot tier
-     * (or the highest tier claw when the slot is empty), or {@code -1} if none should be swapped in
-     */
     private static int findBestClawIndex(Inventory inventory, ItemStack current) {
         int bestRank = current.getItem() instanceof WerewolfClawItem c ? c.getVampirismTier().ordinal() : -1;
         int bestIndex = -1;
-        // only iterate the main inventory slots (0-35); armor/offhand slots must never be a swap target
         for (int i = 0; i < inventory.items.size(); i++) {
             if (inventory.getItem(i).getItem() instanceof WerewolfClawItem c) {
                 int rank = c.getVampirismTier().ordinal();

@@ -26,7 +26,11 @@ public record ServerboundSimpleInputEventPacket(Action action) implements Custom
     }
 
     public enum Action implements StringRepresentable {
-        LEAP("leap");
+        LEAP("leap"),
+        /** The player pressed the claw keybind -> toggle the claw action on/off. */
+        CLAW("claw"),
+        /** The player moved their hotbar selection off the claw slot -> deactivate the claw action. */
+        CLAW_EXIT("claw_exit");
 
         private final String name;
 

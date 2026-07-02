@@ -29,14 +29,17 @@ public class ModKeys {
     private static final String CATEGORY = "keys.werewolves.category";
     private static final String LEAP_KEY = "keys.werewolves.leap";
     private static final String BITE_KEY = "keys.werewolves.bite";
+    private static final String CLAW_KEY = "keys.werewolves.claw";
 
     private static final KeyMapping LEAP = new KeyMapping(LEAP_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_CONTROL, CATEGORY);
     private static final KeyMapping BITE = new KeyMapping(BITE_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
+    private static final KeyMapping CLAW = new KeyMapping(CLAW_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
 
     @ApiStatus.Internal
     public static void registerKeyMapping(@Nonnull RegisterKeyMappingsEvent event){
         event.register(LEAP);
         event.register(BITE);
+        event.register(CLAW);
     }
 
     private final ClientEventHandler clientEventHandler;
@@ -77,6 +80,14 @@ public class ModKeys {
                         clientEventHandler.onZoomPressed();
                     }
                 }
+            } else if (key == CLAW) {
+                if (Helper.isWerewolf(player)) {
+                    WerewolfPlayer werewolf = WerewolfPlayer.get(player);
+                    if (!werewolf.getActionHandler().isActionOnCooldown(ModActions.CLAW.get()) && werewolf.getForm().isTransformed()) {
+                        player.connection.send(new ServerboundSimpleInputEventPacket(ServerboundSimpleInputEventPacket.Action.CLAW));
+                        werewolf.getActionHandler().toggleAction(ModActions.CLAW.get(), new ActionHandler.ActivationContext());
+                    }
+                }
             }
         });
     }
@@ -86,6 +97,8 @@ public class ModKeys {
             return Optional.of(BITE);
         } else if (LEAP.isDown()) {
             return Optional.of(LEAP);
+        } else if (CLAW.consumeClick()) {
+            return Optional.of(CLAW);
         }
         return Optional.empty();
     }

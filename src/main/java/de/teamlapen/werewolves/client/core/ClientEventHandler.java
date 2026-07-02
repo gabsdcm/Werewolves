@@ -3,6 +3,9 @@ package de.teamlapen.werewolves.client.core;
 import de.teamlapen.vampirism.REFERENCE;
 import de.teamlapen.vampirism.api.entity.player.actions.IActionHandler;
 import de.teamlapen.vampirism.client.gui.screens.VampirismContainerScreen;
+import de.teamlapen.vampirism.entity.player.actions.ActionHandler;
+import de.teamlapen.werewolves.network.ServerboundSimpleInputEventPacket;
+import net.minecraft.client.player.LocalPlayer;
 import de.teamlapen.werewolves.api.WResourceLocation;
 import de.teamlapen.werewolves.api.client.gui.ScreenAccessor;
 import de.teamlapen.werewolves.api.entities.player.IWerewolfPlayer;
@@ -40,11 +43,34 @@ import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.util.TriState;
 
-
 public class ClientEventHandler {
     private int zoomTime = 0;
     private double zoomAmount = 0;
     private double zoomModifier = 0;
+    private int clawBaselineSlot = -1;
+
+    @SubscribeEvent
+    public void onClawSlotExit(ClientTickEvent.Post event) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null || !player.isAlive() || !Helper.isWerewolf(player)) {
+            this.clawBaselineSlot = -1;
+            return;
+        }
+        WerewolfPlayer werewolf = WerewolfPlayer.get(player);
+        if (!werewolf.getActionHandler().isActionActive(ModActions.CLAW.get())) {
+            this.clawBaselineSlot = -1;
+            return;
+        }
+        int selected = player.getInventory().selected;
+        if (this.clawBaselineSlot == -1) {
+            this.clawBaselineSlot = selected;
+        } else if (selected != this.clawBaselineSlot) {
+            player.connection
+                    .send(new ServerboundSimpleInputEventPacket(ServerboundSimpleInputEventPacket.Action.CLAW_EXIT));
+            werewolf.getActionHandler().toggleAction(ModActions.CLAW.get(), new ActionHandler.ActivationContext());
+            this.clawBaselineSlot = -1;
+        }
+    }
 
     @SubscribeEvent
     public void onFOVModifier(ViewportEvent.ComputeFov event) {
@@ -55,19 +81,27 @@ public class ClientEventHandler {
         }
     }
 
-
     @SubscribeEvent
     public void onGuiInitPost(ScreenEvent.Init.Post event) {
         if (event.getScreen() instanceof VampirismContainerScreen) {
             if (Helper.isWerewolf(Minecraft.getInstance().player)) {
-                WidgetSprites icon = new WidgetSprites(WResourceLocation.v("widget/appearance"), WResourceLocation.v("widget/appearance_highlighted"));
-                var button = ((ScreenAccessor) event.getScreen()).invokeAddRenderableWidget_werewolves(new ImageButton(((VampirismContainerScreen) event.getScreen()).getGuiLeft() + 47, ((VampirismContainerScreen) event.getScreen()).getGuiTop() + 90, 20, 20, icon, (context) -> Minecraft.getInstance().setScreen(new WerewolfPlayerAppearanceScreen(event.getScreen())), Component.empty()));
-                button.setTooltip(Tooltip.create(Component.translatable("gui.vampirism.vampirism_menu.appearance_menu")));
+                WidgetSprites icon = new WidgetSprites(WResourceLocation.v("widget/appearance"),
+                        WResourceLocation.v("widget/appearance_highlighted"));
+                var button = ((ScreenAccessor) event.getScreen()).invokeAddRenderableWidget_werewolves(
+                        new ImageButton(((VampirismContainerScreen) event.getScreen()).getGuiLeft() + 47,
+                                ((VampirismContainerScreen) event.getScreen()).getGuiTop() + 90, 20, 20, icon,
+                                (context) -> Minecraft.getInstance()
+                                        .setScreen(new WerewolfPlayerAppearanceScreen(event.getScreen())),
+                                Component.empty()));
+                button.setTooltip(
+                        Tooltip.create(Component.translatable("gui.vampirism.vampirism_menu.appearance_menu")));
 
                 WerewolfPlayer werewolf = WerewolfPlayer.get(Minecraft.getInstance().player);
-                if (werewolf.getMaxLevel() == werewolf.getLevel()) return;
+                if (werewolf.getMaxLevel() == werewolf.getLevel())
+                    return;
                 AbstractContainerScreen<?> screen = ((AbstractContainerScreen<?>) event.getScreen());
-                ((ScreenAccessor) event.getScreen()).invokeAddRenderableWidget_werewolves(new ExpBar(screen.getGuiLeft() - 14, screen.getGuiTop()));
+                ((ScreenAccessor) event.getScreen())
+                        .invokeAddRenderableWidget_werewolves(new ExpBar(screen.getGuiLeft() - 14, screen.getGuiTop()));
             }
         }
     }
@@ -88,7 +122,9 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
         if (Helper.isWerewolf(event.getEntity()) && !PlayerAnimatorCompat.checkAnimation(event.getEntity())) {
-            if (WerewolvesModClient.getInstance().getModPlayerRenderer().renderPlayer((AbstractClientPlayer) event.getEntity(), 1, event.getPartialTick(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight())) {
+            if (WerewolvesModClient.getInstance().getModPlayerRenderer().renderPlayer(
+                    (AbstractClientPlayer) event.getEntity(), 1, event.getPartialTick(), event.getPoseStack(),
+                    event.getMultiBufferSource(), event.getPackedLight())) {
                 event.setCanceled(true);
             }
         }
@@ -97,14 +133,21 @@ public class ClientEventHandler {
     public void onZoomPressed() {
         this.zoomTime = 20;
         this.zoomAmount = Minecraft.getInstance().options.fov().get() / 4f / this.zoomTime;
-        this.zoomModifier = Minecraft.getInstance().options.fov().get() - Minecraft.getInstance().options.fov().get() / 4f;
+        this.zoomModifier = Minecraft.getInstance().options.fov().get()
+                - Minecraft.getInstance().options.fov().get() / 4f;
     }
 
     @SubscribeEvent
     public void onLevelJoined(ClientPlayerNetworkEvent.LoggingIn event) {
         if (!WerewolvesConfig.CLIENT.mcaMessage.get() && ModList.get().isLoaded("mca")) {
             WerewolvesConfig.CLIENT.mcaMessage.set(true);
-            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("text.werewolves.mca_integration.first").append(Component.translatable("text.werewolves.mca_integration.seconds").withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/TeamLapen/Werewolves/issues/182")).withUnderlined(true))));
+            Minecraft.getInstance().player
+                    .sendSystemMessage(Component.translatable("text.werewolves.mca_integration.first")
+                            .append(Component.translatable("text.werewolves.mca_integration.seconds")
+                                    .withStyle(style -> style
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                                                    "https://github.com/TeamLapen/Werewolves/issues/182"))
+                                            .withUnderlined(true))));
         }
     }
 }
