@@ -33,6 +33,7 @@ import de.teamlapen.werewolves.core.ModSkills;
 import de.teamlapen.werewolves.core.ModSounds;
 import de.teamlapen.werewolves.effects.LupusSanguinemEffect;
 import de.teamlapen.werewolves.entities.goals.DefendLeaderGoal;
+import de.teamlapen.werewolves.entities.goals.EatToHealGoal;
 import de.teamlapen.werewolves.entities.goals.FollowAlphaWerewolfGoal;
 import de.teamlapen.werewolves.entities.goals.HowlOnHurtGoal;
 import de.teamlapen.werewolves.entities.goals.WerewolfAttackVillageGoal;
@@ -460,6 +461,7 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
         this.goalSelector.addGoal(1, new BreakDoorGoal(this, (difficulty) -> difficulty == net.minecraft.world.Difficulty.HARD));//Only break doors on hard difficulty
         this.goalSelector.addGoal(1, new LeapAtTargetGoal(this, 0.3F + this.getForm().getLeapModifier() * 0.25F));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
+        this.goalSelector.addGoal(3, new EatToHealGoal<>(this));
         this.goalSelector.addGoal(6, new FollowAlphaWerewolfGoal<>(this, 0.8));
         this.goalSelector.addGoal(9, new RandomStrollGoal(this, 0.7));
         this.goalSelector.addGoal(10, new LookAtClosestVisibleGoal(this, Player.class, 20F, 0.6F));
@@ -476,6 +478,14 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, PatrollingMonster.class, 5, true, true, (living) -> UtilLib.isInsideStructure(living, StructureTags.VILLAGE)));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
         this.targetSelector.addGoal(8, new DefendLeaderGoal<>(this));
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(@Nonnull ServerLevelAccessor world, @Nonnull DifficultyInstance difficulty, @Nonnull MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+        SpawnGroupData data = super.finalizeSpawn(world, difficulty, reason, spawnData);
+        this.stockHealingFood();
+        return data;
     }
 
     @Override
