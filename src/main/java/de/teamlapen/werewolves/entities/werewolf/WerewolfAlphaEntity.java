@@ -11,6 +11,7 @@ import de.teamlapen.werewolves.api.entities.werewolf.IWerewolfAlpha;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
 import de.teamlapen.werewolves.core.ModBiomes;
 import de.teamlapen.werewolves.core.ModSounds;
+import de.teamlapen.werewolves.entities.goals.HowlOnHurtGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -196,6 +197,7 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
         this.goalSelector.addGoal(9, new LookAtClosestVisibleGoal(this, Player.class, 10.0F));
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
+        this.targetSelector.addGoal(0, new HowlOnHurtGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isLowerLevel));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, WerewolfAlphaEntity.class, true, false));
