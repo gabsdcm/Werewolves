@@ -89,6 +89,17 @@ public class BalanceConfig {
         public final ModConfigSpec.DoubleValue werewolf_food_spawn_chance;
         public final ModConfigSpec.DoubleValue werewolf_golden_apple_spawn_chance;
 
+        public final ModConfigSpec.IntValue werewolf_bite_effect_cooldown;
+        public final ModConfigSpec.DoubleValue werewolf_bite_effect_chance;
+        public final ModConfigSpec.DoubleValue werewolf_bite_effect_chance_pl;
+        public final ModConfigSpec.DoubleValue werewolf_upgraded_bite_chance;
+        public final ModConfigSpec.DoubleValue werewolf_upgraded_bite_chance_pl;
+        public final ModConfigSpec.IntValue werewolf_bite_stun_duration;
+        public final ModConfigSpec.IntValue werewolf_bite_stun_duration_pl;
+        public final ModConfigSpec.IntValue werewolf_bite_bleeding_duration;
+        public final ModConfigSpec.IntValue werewolf_bite_bleeding_duration_pl;
+        public final ModConfigSpec.DoubleValue werewolf_upgraded_bite_trinket_chance;
+
         public MobProps(ModConfigSpec.Builder builder) {
             builder.push("werewolf");
             werewolf_attack_damage = builder.defineInRange("werewolf_attack_damage", 6.0, 0, Double.MAX_VALUE);
@@ -127,6 +138,19 @@ public class BalanceConfig {
             werewolf_eat_cooldown = builder.comment("Cooldown between two eat to heal attempts", "In ticks").defineInRange("werewolf_eat_cooldown", 600, 0, Integer.MAX_VALUE);
             werewolf_food_spawn_chance = builder.comment("Chance for a werewolf mob to spawn with food in its offhand").defineInRange("werewolf_food_spawn_chance", 0.35, 0, 1);
             werewolf_golden_apple_spawn_chance = builder.comment("Chance for the spawned offhand food to be a golden apple instead of raw meat").defineInRange("werewolf_golden_apple_spawn_chance", 0.05, 0, 1);
+            builder.pop();
+
+            builder.push("werewolf_bite");
+            werewolf_bite_effect_cooldown = builder.comment("Minimum delay between two werewolf mob bites that can apply effects", "In ticks").defineInRange("werewolf_bite_effect_cooldown", 100, 0, Integer.MAX_VALUE);
+            werewolf_bite_effect_chance = builder.comment("Base chance for a werewolf mob bite to apply an effect").defineInRange("werewolf_bite_effect_chance", 0.25, 0, 1);
+            werewolf_bite_effect_chance_pl = builder.comment("Additional effect chance per entity level").defineInRange("werewolf_bite_effect_chance_pl", 0.1, 0, 1);
+            werewolf_upgraded_bite_chance = builder.comment("Base chance for an applied bite effect to be the upgraded variant").defineInRange("werewolf_upgraded_bite_chance", 0.1, 0, 1);
+            werewolf_upgraded_bite_chance_pl = builder.comment("Additional upgraded bite chance per entity level").defineInRange("werewolf_upgraded_bite_chance_pl", 0.1, 0, 1);
+            werewolf_bite_stun_duration = builder.comment("In ticks").defineInRange("werewolf_bite_stun_duration", 30, 0, Integer.MAX_VALUE);
+            werewolf_bite_stun_duration_pl = builder.comment("In ticks").defineInRange("werewolf_bite_stun_duration_pl", 10, 0, Integer.MAX_VALUE);
+            werewolf_bite_bleeding_duration = builder.comment("In ticks").defineInRange("werewolf_bite_bleeding_duration", 60, 0, Integer.MAX_VALUE);
+            werewolf_bite_bleeding_duration_pl = builder.comment("In ticks").defineInRange("werewolf_bite_bleeding_duration_pl", 20, 0, Integer.MAX_VALUE);
+            werewolf_upgraded_bite_trinket_chance = builder.comment("Chance to drop a bite refinement accessory if the werewolf landed an upgraded bite").defineInRange("werewolf_upgraded_bite_trinket_chance", 0.15, 0, 1);
             builder.pop();
         }
     }

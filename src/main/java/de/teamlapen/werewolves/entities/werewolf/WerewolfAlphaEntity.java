@@ -139,6 +139,14 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
     }
 
     @Override
+    public boolean doHurtTarget(@NotNull Entity entity) {
+        if (entity instanceof LivingEntity living) {
+            return this.applyBiteEffects(living);
+        }
+        return super.doHurtTarget(entity);
+    }
+
+    @Override
     public boolean killedEntity(@NotNull ServerLevel level, @NotNull LivingEntity entity) {
         super.killedEntity(level, entity);
         if (entity instanceof WerewolfAlphaEntity) {

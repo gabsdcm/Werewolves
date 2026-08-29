@@ -509,10 +509,11 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
 
     @Override
     public boolean doHurtTarget(@NotNull Entity entity) {
-        if (super.doHurtTarget(entity)) {
-            if (entity instanceof LivingEntity living) {
-                LupusSanguinemEffect.infectRandomByMob(living);
-            }
+        if (!(entity instanceof LivingEntity living)) {
+            return super.doHurtTarget(entity);
+        }
+        if (this.applyBiteEffects(living)) {
+            LupusSanguinemEffect.infectRandomByMob(living);
             return true;
         }
         return false;
