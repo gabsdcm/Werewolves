@@ -34,6 +34,7 @@ import de.teamlapen.werewolves.core.ModSounds;
 import de.teamlapen.werewolves.effects.LupusSanguinemEffect;
 import de.teamlapen.werewolves.entities.goals.DefendLeaderGoal;
 import de.teamlapen.werewolves.entities.goals.FollowAlphaWerewolfGoal;
+import de.teamlapen.werewolves.entities.goals.HowlOnHurtGoal;
 import de.teamlapen.werewolves.entities.goals.WerewolfAttackVillageGoal;
 import de.teamlapen.werewolves.entities.goals.WerewolfDefendVillageGoal;
 import de.teamlapen.werewolves.entities.minion.WerewolfMinionEntity;
@@ -465,6 +466,7 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
 
+        this.targetSelector.addGoal(0, new HowlOnHurtGoal(this));
         this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(4, new WerewolfAttackVillageGoal<>(this));
         this.targetSelector.addGoal(4, new WerewolfDefendVillageGoal<>(this));//Should automatically be mutually exclusive with  attack village
