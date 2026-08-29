@@ -11,7 +11,9 @@ import de.teamlapen.werewolves.api.entities.werewolf.IWerewolfAlpha;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
 import de.teamlapen.werewolves.core.ModBiomes;
 import de.teamlapen.werewolves.core.ModSounds;
+import de.teamlapen.werewolves.entities.goals.EatToHealGoal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -191,6 +193,7 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0F, false));
+        this.goalSelector.addGoal(5, new EatToHealGoal<>(this));
         this.goalSelector.addGoal(6, new AvoidEntityGoal<>(this, Player.class, 6.0F, 0.6, 0.7F, input -> input != null && !isLowerLevel(input)));
         this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.2));
         this.goalSelector.addGoal(9, new LookAtClosestVisibleGoal(this, Player.class, 10.0F));
@@ -201,6 +204,14 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, WerewolfAlphaEntity.class, true, false));
         this.targetSelector.addGoal(6, new NearestAttackableTargetGoal<>(this, PathfinderMob.class, 5, true, false, VampirismAPI.factionRegistry().getPredicate(getFaction(), false, true, false, false, null)));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(@Nonnull ServerLevelAccessor world, @Nonnull DifficultyInstance difficulty, @Nonnull MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+        SpawnGroupData data = super.finalizeSpawn(world, difficulty, reason, spawnData);
+        this.stockHealingFood();
+        return data;
     }
 
     private boolean isLowerLevel(LivingEntity entity) {
