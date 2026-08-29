@@ -71,13 +71,21 @@ public class BalanceConfig {
         public final ModConfigSpec.DoubleValue human_werewolf_attack_damage;
         public final ModConfigSpec.DoubleValue human_werewolf_speed;
 
+        public final ModConfigSpec.DoubleValue alpha_werewolf_max_health;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_max_health_pl;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_attack_damage;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_attack_damage_pl;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_speed;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_speed_pl;
+        public final ModConfigSpec.DoubleValue alpha_werewolf_follow_range;
+
         public MobProps(ModConfigSpec.Builder builder) {
             builder.push("werewolf");
-            werewolf_attack_damage = builder.defineInRange("werewolf_attack_damage", 3, 0, Double.MAX_VALUE);
-            werewolf_attack_damage_pl = builder.defineInRange("werewolf_attack_damage_pl", 1, 0, Double.MAX_VALUE);
-            werewolf_max_health = builder.defineInRange("werewolf_max_health", 30.0, 10, Double.MAX_VALUE);
-            werewolf_max_health_pl = builder.defineInRange("werewolf_max_health_pl", 3, 0, Double.MAX_VALUE);
-            werewolf_speed = builder.defineInRange("werewolf_speed", 0.3, 0.1, 2);
+            werewolf_attack_damage = builder.defineInRange("werewolf_attack_damage", 6.0, 0, Double.MAX_VALUE);
+            werewolf_attack_damage_pl = builder.defineInRange("werewolf_attack_damage_pl", 2.0, 0, Double.MAX_VALUE);
+            werewolf_max_health = builder.defineInRange("werewolf_max_health", 45.0, 10, Double.MAX_VALUE);
+            werewolf_max_health_pl = builder.defineInRange("werewolf_max_health_pl", 6.0, 0, Double.MAX_VALUE);
+            werewolf_speed = builder.defineInRange("werewolf_speed", 0.38, 0.1, 2);
             werewolf_transform_duration = builder.comment("Time until a werewolf turns back human", "In Seconds").defineInRange("werewolf_transform_duration", 25, 10, Integer.MAX_VALUE);
             builder.pop();
 
@@ -85,6 +93,16 @@ public class BalanceConfig {
             human_werewolf_attack_damage = builder.defineInRange("human_werewolf_attack_damage", 3, 0, Double.MAX_VALUE);
             human_werewolf_max_health = builder.defineInRange("human_werewolf_max_health", 30.0, 10, Double.MAX_VALUE);
             human_werewolf_speed = builder.defineInRange("human_werewolf_speed", 0.36, 0.1, 2);
+            builder.pop();
+
+            builder.push("alpha_werewolf");
+            alpha_werewolf_attack_damage = builder.defineInRange("alpha_werewolf_attack_damage", 8.0, 0, Double.MAX_VALUE);
+            alpha_werewolf_attack_damage_pl = builder.defineInRange("alpha_werewolf_attack_damage_pl", 2.0, 0, Double.MAX_VALUE);
+            alpha_werewolf_max_health = builder.defineInRange("alpha_werewolf_max_health", 150.0, 10, Double.MAX_VALUE);
+            alpha_werewolf_max_health_pl = builder.defineInRange("alpha_werewolf_max_health_pl", 30.0, 0, Double.MAX_VALUE);
+            alpha_werewolf_speed = builder.defineInRange("alpha_werewolf_speed", 0.36, 0.1, 2);
+            alpha_werewolf_speed_pl = builder.defineInRange("alpha_werewolf_speed_pl", 0.01, 0, 1);
+            alpha_werewolf_follow_range = builder.defineInRange("alpha_werewolf_follow_range", 20.0, 1, 128);
             builder.pop();
         }
     }

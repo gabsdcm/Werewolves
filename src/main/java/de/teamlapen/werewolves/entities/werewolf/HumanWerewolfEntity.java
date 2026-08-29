@@ -8,6 +8,8 @@ import de.teamlapen.vampirism.entity.vampire.VampireBaseEntity;
 import de.teamlapen.werewolves.api.entities.werewolf.TransformType;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfTransformable;
+import de.teamlapen.werewolves.config.BalanceConfig;
+import de.teamlapen.werewolves.config.WerewolvesConfig;
 import de.teamlapen.werewolves.core.ModEntities;
 import de.teamlapen.werewolves.util.FormHelper;
 import de.teamlapen.werewolves.util.Helper;
@@ -113,11 +115,24 @@ public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransf
     }
 
     public static AttributeSupplier.Builder getAttributeBuilder() {
+        // attribute suppliers are built during mod loading, before the server balance config is loaded, so only the defaults are readable here. updateEntityAttributes applies the configured values once the entity exists.
+        BalanceConfig.MobProps props = WerewolvesConfig.BALANCE.MOBPROPS;
         return PathfinderMob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, 0.36)
+                .add(Attributes.MOVEMENT_SPEED, props.human_werewolf_speed.getDefault())
                 .add(Attributes.FOLLOW_RANGE, 48.0D)
-                .add(Attributes.ATTACK_DAMAGE, 3)
-                .add(Attributes.MAX_HEALTH, 30.0);
+                .add(Attributes.ATTACK_DAMAGE, props.human_werewolf_attack_damage.getDefault())
+                .add(Attributes.MAX_HEALTH, props.human_werewolf_max_health.getDefault());
+    }
+
+    protected void updateEntityAttributes() {
+        BalanceConfig.MobProps props = WerewolvesConfig.BALANCE.MOBPROPS;
+        boolean wasFullHealth = this.getHealth() >= this.getMaxHealth();
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(props.human_werewolf_speed.get());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(props.human_werewolf_attack_damage.get());
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(props.human_werewolf_max_health.get());
+        if (wasFullHealth) {
+            this.setHealth(this.getMaxHealth());
+        }
     }
 
     @Override
@@ -152,6 +167,9 @@ public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransf
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
+        if (!this.level().isClientSide()) {
+            this.updateEntityAttributes();
+        }
         if (this.getEntityData().get(FORM) == -1) {
             this.getEntityData().set(FORM, this.getRandom().nextInt(2));
         }

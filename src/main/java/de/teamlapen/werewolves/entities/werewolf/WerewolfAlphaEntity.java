@@ -9,6 +9,8 @@ import de.teamlapen.vampirism.entity.factions.FactionPlayerHandler;
 import de.teamlapen.vampirism.entity.vampire.VampireBaseEntity;
 import de.teamlapen.werewolves.api.entities.werewolf.IWerewolfAlpha;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
+import de.teamlapen.werewolves.config.BalanceConfig;
+import de.teamlapen.werewolves.config.WerewolvesConfig;
 import de.teamlapen.werewolves.core.ModBiomes;
 import de.teamlapen.werewolves.core.ModSounds;
 import net.minecraft.core.BlockPos;
@@ -46,11 +48,13 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
     }
 
     public static AttributeSupplier.Builder getAttributeBuilder() {
-        return VampireBaseEntity.getAttributeBuilder() //TODO values
-                .add(Attributes.MAX_HEALTH, BalanceMobProps.mobProps.VAMPIRE_BARON_MAX_HEALTH)
-                .add(Attributes.ATTACK_DAMAGE, BalanceMobProps.mobProps.VAMPIRE_BARON_ATTACK_DAMAGE)
-                .add(Attributes.MOVEMENT_SPEED, BalanceMobProps.mobProps.VAMPIRE_BARON_MOVEMENT_SPEED)
-                .add(Attributes.FOLLOW_RANGE, 5);
+        // attribute suppliers are built during mod loading, before the server balance config is loaded, so only the defaults are readable here. updateEntityAttributes applies the configured values once the entity exists.
+        BalanceConfig.MobProps props = WerewolvesConfig.BALANCE.MOBPROPS;
+        return VampireBaseEntity.getAttributeBuilder()
+                .add(Attributes.MAX_HEALTH, props.alpha_werewolf_max_health.getDefault())
+                .add(Attributes.ATTACK_DAMAGE, props.alpha_werewolf_attack_damage.getDefault())
+                .add(Attributes.MOVEMENT_SPEED, props.alpha_werewolf_speed.getDefault())
+                .add(Attributes.FOLLOW_RANGE, props.alpha_werewolf_follow_range.getDefault());
     }
 
     private int followingEntities = 0;
@@ -242,10 +246,12 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
         return true;
     }
 
-    protected void updateEntityAttributes() { //TODO different values
-        this.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(20D);
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(BalanceMobProps.mobProps.VAMPIRE_BARON_MOVEMENT_SPEED * Math.pow((BalanceMobProps.mobProps.VAMPIRE_BARON_IMPROVEMENT_PER_LEVEL - 1) / 5 + 1, (getEntityLevel())));
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BalanceMobProps.mobProps.VAMPIRE_BARON_MAX_HEALTH * Math.pow(BalanceMobProps.mobProps.VAMPIRE_BARON_IMPROVEMENT_PER_LEVEL, getEntityLevel()));
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BalanceMobProps.mobProps.VAMPIRE_BARON_ATTACK_DAMAGE * Math.pow(BalanceMobProps.mobProps.VAMPIRE_BARON_IMPROVEMENT_PER_LEVEL, getEntityLevel()));
+    protected void updateEntityAttributes() {
+        int l = Math.max(getEntityLevel(), 0);
+        BalanceConfig.MobProps props = WerewolvesConfig.BALANCE.MOBPROPS;
+        this.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(props.alpha_werewolf_follow_range.get());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(props.alpha_werewolf_speed.get() + props.alpha_werewolf_speed_pl.get() * l);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(props.alpha_werewolf_max_health.get() + props.alpha_werewolf_max_health_pl.get() * l);
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(props.alpha_werewolf_attack_damage.get() + props.alpha_werewolf_attack_damage_pl.get() * l);
     }
 }
