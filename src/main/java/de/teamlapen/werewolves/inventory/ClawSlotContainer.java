@@ -7,14 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Single slot {@link Container} adapter that exposes the werewolf's dedicated {@link WerewolfClawSlot}
- * to the menu system without keeping a second copy of the stack.
- * <p>
- * Every mutation writes straight back into the real {@link WerewolfClawSlot} and, on the server,
- * triggers the existing claw slot sync via {@link WerewolfPlayer#syncClawSlot()} so the client and
- * the persisted NBT stay in agreement.
- */
 public class ClawSlotContainer implements Container {
 
     private final @NotNull WerewolfPlayer player;
@@ -27,11 +19,6 @@ public class ClawSlotContainer implements Container {
         return this.player.getClawSlot();
     }
 
-    /**
-     * @return whether the claw action is currently active. While active the stack must not be mutated
-     * (the {@link de.teamlapen.werewolves.entities.player.werewolf.actions.ClawAction} owns attribute
-     * modifiers keyed to it); the menu slot blocks insertion/removal in that case.
-     */
     public boolean isActive() {
         return this.slot().isActive();
     }
@@ -90,7 +77,6 @@ public class ClawSlotContainer implements Container {
 
     @Override
     public void setChanged() {
-        // the sync mechanism is server side only; WerewolfPlayer.syncClawSlot() guards on isRemote()
         this.player.syncClawSlot();
     }
 

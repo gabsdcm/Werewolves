@@ -12,17 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * Routes shift-clicks to and from the werewolf claw slot that {@code VampirismMenuMixin} appends to
- * the {@link de.teamlapen.vampirism.inventory.VampirismMenu}.
- * <p>
- * The base {@link InventoryContainerMenu#quickMoveStack} only knows about the selector slots and the
- * 36 player slots (indices 0..size+35); the appended claw slot sits after those, so its shift-click
- * handling has to be added here. The guard only fires for menus that actually contain a
- * {@link ClawMenuSlot}, leaving every other {@code InventoryContainerMenu} untouched. Claws are the
- * only item that ever enters the claw slot, and while the claw action is active the slot refuses
- * changes (see {@link ClawMenuSlot#mayPlace}/{@code mayPickup}).
- */
 @Mixin(value = InventoryContainerMenu.class, remap = false)
 public abstract class InventoryContainerMenuMixin extends AbstractContainerMenu {
 
@@ -42,7 +31,7 @@ public abstract class InventoryContainerMenuMixin extends AbstractContainerMenu 
             }
         }
         if (clawSlot == null) {
-            return; // not a werewolf claw menu -> let vanilla base logic run
+            return; 
         }
 
         Slot clicked = this.slots.get(index);
@@ -51,14 +40,12 @@ public abstract class InventoryContainerMenuMixin extends AbstractContainerMenu 
         }
 
         if (index == clawIndex) {
-            // claw slot -> player inventory (claw slot always precedes nothing else we own)
             if (!clawSlot.mayPickup(player)) {
                 cir.setReturnValue(ItemStack.EMPTY);
                 return;
             }
             ItemStack inSlot = clicked.getItem();
             ItemStack original = inSlot.copy();
-            // player slots are the 36 slots directly before the claw slot
             int playerStart = clawIndex - 36;
             if (!this.moveItemStackTo(inSlot, playerStart, clawIndex, true)) {
                 cir.setReturnValue(ItemStack.EMPTY);
@@ -74,12 +61,11 @@ public abstract class InventoryContainerMenuMixin extends AbstractContainerMenu 
             return;
         }
 
-        // any other slot: only intercept when a claw is shift-clicked and the claw slot can take it
         if (clicked.getItem().getItem() instanceof WerewolfClawItem && clawSlot.mayPlace(clicked.getItem())) {
             ItemStack inSlot = clicked.getItem();
             ItemStack original = inSlot.copy();
             if (!this.moveItemStackTo(inSlot, clawIndex, clawIndex + 1, false)) {
-                return; // could not place (e.g. already occupied) -> fall through to vanilla handling
+                return; 
             }
             if (inSlot.isEmpty()) {
                 clicked.setByPlayer(ItemStack.EMPTY);

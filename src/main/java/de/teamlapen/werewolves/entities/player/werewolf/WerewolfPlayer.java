@@ -644,7 +644,6 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public void checkToolDamage(@NotNull ItemStack from, @NotNull ItemStack itemInHand, boolean forceCalculation) {
         AttributeInstance attribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
         if (this.clawSlot.isActive()) {
-            // the claw action supplies its own attack damage modifier while active; suppress the passive claws modifier
             if (attribute != null) {
                 attribute.removeModifier(CLAWS);
             }

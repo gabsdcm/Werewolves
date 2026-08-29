@@ -11,12 +11,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-/**
- * The claw action redirects the hotbar selection onto its own dedicated slot (see
- * {@link de.teamlapen.werewolves.mixin.entity.InventoryMixin}), which draws its own permanent
- * highlight in {@link de.teamlapen.werewolves.client.core.ModHUDOverlay}. The vanilla selection box
- * around the now-irrelevant underlying hotbar slot must be suppressed while the claw is active.
- */
 @Mixin(Gui.class)
 public abstract class GuiMixin {
 

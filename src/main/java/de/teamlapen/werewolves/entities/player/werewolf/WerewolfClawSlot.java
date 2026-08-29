@@ -6,13 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Dedicated single slot that holds the equipped werewolf claw item.
- * <p>
- * The slot lives outside of the vanilla inventory and the {@link WerewolfInventory} armor storage.
- * It is serialized in the {@link WerewolfPlayer} NBT and therefore persists across death/respawn
- * (the werewolf player attachment uses {@code copyOnDeath()}). It is intentionally never dropped.
- */
 public class WerewolfClawSlot implements ISyncableSaveData {
 
     private static final String KEY_CLAW_SLOT = "claw_slot";
@@ -63,7 +56,6 @@ public class WerewolfClawSlot implements ISyncableSaveData {
 
     @Override
     public void deserializeUpdateNBT(HolderLookup.Provider provider, @NotNull CompoundTag compoundTag) {
-        // only apply when the packet actually carries claw slot data to avoid clobbering on unrelated partial syncs
         if (compoundTag.contains("active")) {
             deserializeNBT(provider, compoundTag);
         }
