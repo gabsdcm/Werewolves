@@ -458,6 +458,7 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new BreakDoorGoal(this, (difficulty) -> difficulty == net.minecraft.world.Difficulty.HARD));//Only break doors on hard difficulty
+        this.goalSelector.addGoal(1, new LeapAtTargetGoal(this, 0.3F + this.getForm().getLeapModifier() * 0.25F));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
         this.goalSelector.addGoal(6, new FollowAlphaWerewolfGoal<>(this, 0.8));
         this.goalSelector.addGoal(9, new RandomStrollGoal(this, 0.7));
