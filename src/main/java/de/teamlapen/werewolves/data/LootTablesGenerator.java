@@ -245,6 +245,14 @@ public class LootTablesGenerator {
                             .when(LootItemRandomChanceWithEnchantedBonusCondition.randomChanceAndLootingBoost(this.registries, 0.05f, 0.025f))
                             .add(LootItem.lootTableItem(ModItems.V.VAMPIRE_BOOK.get()).apply(AddBookNbtFunction.builder()).setWeight(1))
                     )
+                    .withPool(LootPool.lootPool()
+                            .name("accessories")
+                            .when(LootItemKilledByPlayerCondition.killedByPlayer())
+                            .when(LootItemRandomChanceCondition.randomChance(0.05f))
+                            .setRolls(ConstantValue.exactly(1))
+                            .add(LootItem.lootTableItem(ModItems.BONE_NECKLACE.get()).setWeight(1).apply(RefinementSetFunction.builder(WReference.WEREWOLF_FACTION)))
+                            .add(LootItem.lootTableItem(ModItems.CHARM_BRACELET.get()).setWeight(1).apply(RefinementSetFunction.builder(WReference.WEREWOLF_FACTION)))
+                            .add(LootItem.lootTableItem(ModItems.DREAM_CATCHER.get()).setWeight(1).apply(RefinementSetFunction.builder(WReference.WEREWOLF_FACTION))))
             );
         }
 

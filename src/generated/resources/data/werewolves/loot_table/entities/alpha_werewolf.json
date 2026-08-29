@@ -97,6 +97,58 @@
       ],
       "name": "vampire_book",
       "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "chance": 0.05,
+          "condition": "minecraft:random_chance"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "faction": {
+                "id": "werewolves:werewolf"
+              },
+              "function": "vampirism:add_refinement_set"
+            }
+          ],
+          "name": "werewolves:bone_necklace"
+        },
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "faction": {
+                "id": "werewolves:werewolf"
+              },
+              "function": "vampirism:add_refinement_set"
+            }
+          ],
+          "name": "werewolves:charm_bracelet"
+        },
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "faction": {
+                "id": "werewolves:werewolf"
+              },
+              "function": "vampirism:add_refinement_set"
+            }
+          ],
+          "name": "werewolves:dream_catcher"
+        }
+      ],
+      "name": "accessories",
+      "rolls": 1.0
     }
   ],
   "random_sequence": "werewolves:entities/alpha_werewolf"

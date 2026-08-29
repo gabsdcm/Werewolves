@@ -7,6 +7,7 @@ import de.teamlapen.vampirism.entity.player.refinements.RefinementSet;
 import de.teamlapen.werewolves.entities.player.WerewolfRefinementSet;
 import de.teamlapen.werewolves.util.REFERENCE;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -14,6 +15,10 @@ import java.util.function.Supplier;
 public class ModRefinementSets {
 
     public static final DeferredRegister<IRefinementSet> REFINEMENT_SETS = DeferredRegister.create(VampirismRegistries.Keys.REFINEMENT_SET, REFERENCE.MODID);
+
+    public static final DeferredHolder<IRefinementSet, IRefinementSet> STUN_BITE_SET;
+    public static final DeferredHolder<IRefinementSet, IRefinementSet> BLEEDING_BITE_SET;
+    public static final DeferredHolder<IRefinementSet, IRefinementSet> VARIABLE_BITE_SET;
 
     static void register(IEventBus bus) {
         REFINEMENT_SETS.register(bus);
@@ -70,9 +75,9 @@ public class ModRefinementSets {
             REFINEMENT_SETS.register("rage_fury", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.LEGENDARY, 0xff0006, ModRefinements.RAGE_FURY));
             REFINEMENT_SETS.register("health_after_kill", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.COMMON, 0x16af00, ModRefinements.HEALTH_AFTER_KILL));
             REFINEMENT_SETS.register("health", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.RARE, 0x16af00, ModRefinements.HEALTH_AFTER_KILL, ModRefinements.V.HEALTH_2));
-            REFINEMENT_SETS.register("stun_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.RARE, 0xedb521, ModRefinements.STUN_BITE));
-            REFINEMENT_SETS.register("bleeding_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.EPIC, 0xcdc2639, ModRefinements.BLEEDING_BITE));
-            REFINEMENT_SETS.register("variable_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.EPIC, 0xcdc2639, ModRefinements.BLEEDING_BITE, ModRefinements.STUN_BITE));
+            STUN_BITE_SET = REFINEMENT_SETS.register("stun_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.RARE, 0xedb521, ModRefinements.STUN_BITE));
+            BLEEDING_BITE_SET = REFINEMENT_SETS.register("bleeding_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.EPIC, 0xcdc2639, ModRefinements.BLEEDING_BITE));
+            VARIABLE_BITE_SET = REFINEMENT_SETS.register("variable_bite", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.EPIC, 0xcdc2639, ModRefinements.BLEEDING_BITE, ModRefinements.STUN_BITE));
             REFINEMENT_SETS.register("more_wolves", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.UNCOMMON, 0x929292, ModRefinements.MORE_WOLVES));
             REFINEMENT_SETS.register("greater_doge_chance", () -> new WerewolfRefinementSet(IRefinementSet.Rarity.UNCOMMON, 0x4df1f3, ModRefinements.GREATER_DOGE_CHANCE));
         }

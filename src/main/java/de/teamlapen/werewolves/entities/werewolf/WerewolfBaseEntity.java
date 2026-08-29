@@ -1,17 +1,34 @@
 package de.teamlapen.werewolves.entities.werewolf;
 
+import de.teamlapen.vampirism.api.difficulty.IAdjustableLevel;
+import de.teamlapen.vampirism.api.entity.player.refinement.IRefinementSet;
+import de.teamlapen.vampirism.api.items.IRefinementItem;
 import de.teamlapen.vampirism.entity.VampirismEntity;
 import de.teamlapen.werewolves.api.entities.werewolf.IWerewolfMob;
+import de.teamlapen.werewolves.config.BalanceConfig;
+import de.teamlapen.werewolves.config.WerewolvesConfig;
+import de.teamlapen.werewolves.core.ModEffects;
+import de.teamlapen.werewolves.core.ModRefinementSets;
+import de.teamlapen.werewolves.items.WerewolfRefinementItem;
+import de.teamlapen.werewolves.util.DamageHandler;
 import de.teamlapen.werewolves.util.FormHelper;
+import de.teamlapen.werewolves.world.ModDamageSources;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public abstract class WerewolfBaseEntity extends VampirismEntity implements IWerewolfMob {
 
@@ -31,6 +48,62 @@ public abstract class WerewolfBaseEntity extends VampirismEntity implements IWer
 
     public void bite(LivingEntity entity) {
         //TODO take a look at ExtendedCreature#onBite
+    }
+
+    private static final List<DeferredHolder<IRefinementSet, IRefinementSet>> BITE_REFINEMENT_SETS = List.of(ModRefinementSets.STUN_BITE_SET, ModRefinementSets.BLEEDING_BITE_SET, ModRefinementSets.VARIABLE_BITE_SET);
+
+    private int biteEffectCooldown;
+    private boolean appliedUpgradedBite;
+
+    /**
+     * Bite damage is dealt on every hit, the stun/bleeding roll is gated by its own cooldown so effects can't be stacked every swing.
+     */
+    protected boolean applyBiteEffects(LivingEntity target) {
+        BalanceConfig.MobProps config = WerewolvesConfig.BALANCE.MOBPROPS;
+        if (!DamageHandler.hurtModded(target, (ModDamageSources sources) -> sources.bite(this), (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+            return false;
+        }
+        if (this.biteEffectCooldown > 0) {
+            return true;
+        }
+        this.biteEffectCooldown = config.werewolf_bite_effect_cooldown.get();
+        int level = this instanceof IAdjustableLevel adjustable ? Math.max(0, adjustable.getEntityLevel()) : 0;
+        if (this.random.nextFloat() >= config.werewolf_bite_effect_chance.get() + config.werewolf_bite_effect_chance_pl.get() * level) {
+            return true;
+        }
+        int stunDuration = config.werewolf_bite_stun_duration.get() + config.werewolf_bite_stun_duration_pl.get() * level;
+        int bleedingDuration = config.werewolf_bite_bleeding_duration.get() + config.werewolf_bite_bleeding_duration_pl.get() * level;
+        if (this.random.nextFloat() < config.werewolf_upgraded_bite_chance.get() + config.werewolf_upgraded_bite_chance_pl.get() * level) {
+            this.appliedUpgradedBite = true;
+            target.addEffect(new MobEffectInstance(ModEffects.STUN, stunDuration, 1));
+            target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, bleedingDuration, 1));
+        } else if (this.random.nextBoolean()) {
+            target.addEffect(new MobEffectInstance(ModEffects.STUN, stunDuration));
+        } else {
+            target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, bleedingDuration));
+        }
+        return true;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.biteEffectCooldown > 0) {
+            this.biteEffectCooldown--;
+        }
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(@NotNull ServerLevel level, @NotNull DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+        if (!this.appliedUpgradedBite) return;
+        if (this.random.nextFloat() >= WerewolvesConfig.BALANCE.MOBPROPS.werewolf_upgraded_bite_trinket_chance.get()) return;
+        IRefinementItem.AccessorySlotType[] slots = IRefinementItem.AccessorySlotType.values();
+        WerewolfRefinementItem item = WerewolfRefinementItem.getRefinementItem(slots[this.random.nextInt(slots.length)]);
+        ItemStack stack = new ItemStack(item);
+        if (item.applyRefinementSet(stack, BITE_REFINEMENT_SETS.get(this.random.nextInt(BITE_REFINEMENT_SETS.size())).get())) {
+            this.spawnAtLocation(stack);
+        }
     }
 
     @Override
