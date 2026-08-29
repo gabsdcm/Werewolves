@@ -9,6 +9,7 @@ import de.teamlapen.werewolves.api.entities.werewolf.TransformType;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfTransformable;
 import de.teamlapen.werewolves.core.ModEntities;
+import de.teamlapen.werewolves.core.ModItems;
 import de.teamlapen.werewolves.util.FormHelper;
 import de.teamlapen.werewolves.util.Helper;
 import net.minecraft.core.BlockPos;
@@ -17,28 +18,37 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
 public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransformable {
     private static final EntityDataAccessor<Integer> FORM = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SKIN_TYPE = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> EYE_TYPE = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> GLOWING_EYES = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EquipmentSlot[] PELT_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    private static final float[] PELT_SLOT_CHANCES = {0.4F, 0.9F, 0.75F, 0.5F};
 
     private final EntityClassType classType;
     private final EntityActionTier actionTier;
@@ -80,6 +90,39 @@ public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransf
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(@Nonnull ServerLevelAccessor world, @Nonnull DifficultyInstance difficulty, @Nonnull MobSpawnType reason, @Nullable SpawnGroupData spawnData) {
+        this.randomEquipments();
+        return super.finalizeSpawn(world, difficulty, reason, spawnData);
+    }
+
+    protected void randomEquipments() {
+        int roll = this.getRandom().nextInt(20);
+        if (roll < 10) {
+            return;
+        }
+        List<ItemLike> pelt;
+        if (roll < 17) {
+            pelt = List.of(ModItems.PELT_HELMET, ModItems.PELT_CHESTPLATE, ModItems.PELT_LEGGINGS, ModItems.PELT_BOOTS);
+        } else if (roll < 19) {
+            pelt = List.of(ModItems.DARK_PELT_HELMET, ModItems.DARK_PELT_CHESTPLATE, ModItems.DARK_PELT_LEGGINGS, ModItems.DARK_PELT_BOOTS);
+        } else {
+            pelt = List.of(ModItems.WHITE_PELT_HELMET, ModItems.WHITE_PELT_CHESTPLATE, ModItems.WHITE_PELT_LEGGINGS, ModItems.WHITE_PELT_BOOTS);
+        }
+        for (int i = 0; i < PELT_SLOTS.length; i++) {
+            if (this.getRandom().nextFloat() < PELT_SLOT_CHANCES[i]) {
+                this.setItemSlot(PELT_SLOTS[i], new ItemStack(pelt.get(i)));
+            }
+        }
+        this.setDontDropEquipment();
+    }
+
+    protected void setDontDropEquipment() {
+        Arrays.fill(this.armorDropChances, 0);
+        Arrays.fill(this.handDropChances, 0);
     }
 
     @Override
