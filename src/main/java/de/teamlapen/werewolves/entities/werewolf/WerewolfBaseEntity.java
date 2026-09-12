@@ -10,6 +10,7 @@ import de.teamlapen.werewolves.config.WerewolvesConfig;
 import de.teamlapen.werewolves.core.ModEffects;
 import de.teamlapen.werewolves.core.ModItems;
 import de.teamlapen.werewolves.core.ModRefinementSets;
+import de.teamlapen.werewolves.core.ModSounds;
 import de.teamlapen.werewolves.items.WerewolfRefinementItem;
 import de.teamlapen.werewolves.util.DamageHandler;
 import de.teamlapen.werewolves.util.FormHelper;
@@ -68,27 +69,38 @@ public abstract class WerewolfBaseEntity extends VampirismEntity implements IWer
 
     private static final List<DeferredHolder<IRefinementSet, IRefinementSet>> BITE_REFINEMENT_SETS = List.of(ModRefinementSets.STUN_BITE_SET, ModRefinementSets.BLEEDING_BITE_SET, ModRefinementSets.VARIABLE_BITE_SET);
 
-    private int biteEffectCooldown;
+    private static final int BITE_COOLDOWN = 160;
+    private static final int STUN_BASE = 30;
+    private static final int STUN_PER_LEVEL = 10;
+    private static final int STUN_MAX = 60;
+    private static final int BLEED_BASE = 60;
+    private static final int BLEED_PER_LEVEL = 20;
+    private static final int BLEED_MAX = 90;
+
+    private int biteCooldown;
     private boolean appliedUpgradedBite;
 
     /**
-     * Bite damage is dealt on every hit, the stun/bleeding roll is gated by its own cooldown so effects can't be stacked every swing.
+     * The whole bite (damage, sound and the stun/bleeding roll) is gated by a single cooldown, so a werewolf can only land one bite every {@value #BITE_COOLDOWN} ticks.
+     * The cooldown is only consumed when the damage actually goes through.
      */
     protected boolean applyBiteEffects(LivingEntity target) {
         BalanceConfig.MobProps config = WerewolvesConfig.BALANCE.MOBPROPS;
+        if (this.biteCooldown > 0) {
+            return false;
+        }
         if (!DamageHandler.hurtModded(target, (ModDamageSources sources) -> sources.bite(this), (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
             return false;
         }
-        if (this.biteEffectCooldown > 0) {
-            return true;
-        }
-        this.biteEffectCooldown = config.werewolf_bite_effect_cooldown.get();
+        this.setLastHurtMob(target);
+        this.playSound(ModSounds.ENTITY_WEREWOLF_BITE.get(), 1.0F, 1.0F);
+        this.biteCooldown = BITE_COOLDOWN;
         int level = this instanceof IAdjustableLevel adjustable ? Math.max(0, adjustable.getEntityLevel()) : 0;
         if (this.random.nextFloat() >= config.werewolf_bite_effect_chance.get() + config.werewolf_bite_effect_chance_pl.get() * level) {
             return true;
         }
-        int stunDuration = config.werewolf_bite_stun_duration.get() + config.werewolf_bite_stun_duration_pl.get() * level;
-        int bleedingDuration = config.werewolf_bite_bleeding_duration.get() + config.werewolf_bite_bleeding_duration_pl.get() * level;
+        int stunDuration = Math.min(STUN_BASE + STUN_PER_LEVEL * level, STUN_MAX);
+        int bleedingDuration = Math.min(BLEED_BASE + BLEED_PER_LEVEL * level, BLEED_MAX);
         if (this.random.nextFloat() < config.werewolf_upgraded_bite_chance.get() + config.werewolf_upgraded_bite_chance_pl.get() * level) {
             this.appliedUpgradedBite = true;
             target.addEffect(new MobEffectInstance(ModEffects.STUN, stunDuration, 1));
@@ -99,14 +111,6 @@ public abstract class WerewolfBaseEntity extends VampirismEntity implements IWer
             target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, bleedingDuration));
         }
         return true;
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (this.biteEffectCooldown > 0) {
-            this.biteEffectCooldown--;
-        }
     }
 
     @Override
@@ -125,6 +129,9 @@ public abstract class WerewolfBaseEntity extends VampirismEntity implements IWer
     @Override
     public void aiStep() {
         super.aiStep();
+        if (this.biteCooldown > 0) {
+            this.biteCooldown--;
+        }
         if (!this.level().isClientSide()) {
             this.tickHealthRegeneration();
         }

@@ -141,8 +141,8 @@ public class WerewolfAlphaEntity extends WerewolfBaseEntity implements IWerewolf
 
     @Override
     public boolean doHurtTarget(@NotNull Entity entity) {
-        if (entity instanceof LivingEntity living) {
-            return this.applyBiteEffects(living);
+        if (entity instanceof LivingEntity living && this.applyBiteEffects(living)) {
+            return true;
         }
         return super.doHurtTarget(entity);
     }
