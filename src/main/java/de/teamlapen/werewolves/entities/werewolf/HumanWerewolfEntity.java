@@ -49,8 +49,7 @@ public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransf
     private static final EntityDataAccessor<Integer> SKIN_TYPE = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> EYE_TYPE = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> GLOWING_EYES = SynchedEntityData.defineId(HumanWerewolfEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EquipmentSlot[] PELT_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-    private static final float[] PELT_SLOT_CHANCES = {0.4F, 0.9F, 0.75F, 0.5F};
+    private static final float PELT_HELMET_CHANCE = 0.4F;
 
     private final EntityClassType classType;
     private final EntityActionTier actionTier;
@@ -109,15 +108,14 @@ public class HumanWerewolfEntity extends PathfinderMob implements WerewolfTransf
         List<ItemLike> pelt;
         if (roll < 17) {
             pelt = List.of(ModItems.PELT_HELMET, ModItems.PELT_CHESTPLATE, ModItems.PELT_LEGGINGS, ModItems.PELT_BOOTS);
-        } else if (roll < 19) {
-            pelt = List.of(ModItems.DARK_PELT_HELMET, ModItems.DARK_PELT_CHESTPLATE, ModItems.DARK_PELT_LEGGINGS, ModItems.DARK_PELT_BOOTS);
         } else {
-            pelt = List.of(ModItems.WHITE_PELT_HELMET, ModItems.WHITE_PELT_CHESTPLATE, ModItems.WHITE_PELT_LEGGINGS, ModItems.WHITE_PELT_BOOTS);
+            pelt = List.of(ModItems.DARK_PELT_HELMET, ModItems.DARK_PELT_CHESTPLATE, ModItems.DARK_PELT_LEGGINGS, ModItems.DARK_PELT_BOOTS);
         }
-        for (int i = 0; i < PELT_SLOTS.length; i++) {
-            if (this.getRandom().nextFloat() < PELT_SLOT_CHANCES[i]) {
-                this.setItemSlot(PELT_SLOTS[i], new ItemStack(pelt.get(i)));
-            }
+        this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(pelt.get(1)));
+        this.setItemSlot(EquipmentSlot.LEGS, new ItemStack(pelt.get(2)));
+        this.setItemSlot(EquipmentSlot.FEET, new ItemStack(pelt.get(3)));
+        if (this.getRandom().nextFloat() < PELT_HELMET_CHANCE) {
+            this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(pelt.get(0)));
         }
         this.setDontDropEquipment();
     }
