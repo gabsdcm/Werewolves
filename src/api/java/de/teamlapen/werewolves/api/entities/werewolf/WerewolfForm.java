@@ -17,11 +17,11 @@ public class WerewolfForm {
     private static final Map<String, WerewolfForm> REGISTRY = new HashMap<>();
     public static final Codec<WerewolfForm> CODEC = Codec.STRING.xmap(WerewolfForm::getForm, WerewolfForm::getName);
     public static final StreamCodec<ByteBuf, WerewolfForm> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(REGISTRY::get, WerewolfForm::getName);
-    public static final WerewolfForm NONE = new WerewolfForm("none", null, true, false, 0, 0F, true, 0);
-    public static final WerewolfForm HUMAN = new WerewolfForm("human", null, true, true, 3, 0.05F, true, 0.16f);
-    public static final WerewolfForm BEAST = new WerewolfForm("beast", WerewolfSize.BEAST, false, true, 11, 0.2F, true, 0.32f);
-    public static final WerewolfForm BEAST4L = new WerewolfForm("beast4l", WerewolfSize.BEAST, false, true, 11, 0.3F, false, 0.32f);
-    public static final WerewolfForm SURVIVALIST = new WerewolfForm("survivalist", WerewolfSize.SURVIVAL, false, true, 11, 0.4F, false, 0.8f);
+    public static final WerewolfForm NONE = new WerewolfForm("none", null, true, false, 0, 0F, true, 0, 0);
+    public static final WerewolfForm HUMAN = new WerewolfForm("human", null, true, true, 3, 0.05F, true, 0.16f, 0.16f);
+    public static final WerewolfForm BEAST = new WerewolfForm("beast", WerewolfSize.BEAST, false, true, 11, 0.2F, true, 0.32f, 0.32f);
+    public static final WerewolfForm BEAST4L = new WerewolfForm("beast4l", WerewolfSize.BEAST, false, true, 11, 0.3F, false, 0.32f, 0.32f);
+    public static final WerewolfForm SURVIVALIST = new WerewolfForm("survivalist", WerewolfSize.SURVIVAL, false, true, 11, 0.4F, false, 0.8f, 0.8f);
 
     @Nonnull
     private final String name;
@@ -34,8 +34,9 @@ public class WerewolfForm {
     private final float damageReduction;
     private final boolean hasArms;
     private final float leapModifier;
+    private final float mobLeapModifier;
 
-    WerewolfForm(@Nonnull String name, @Nullable Map<Pose, EntityDimensions> sizeMap, boolean humanLike, boolean transformed, int skinTypes, float damageReduction, boolean hasArms, float leapModifier) {
+    WerewolfForm(@Nonnull String name, @Nullable Map<Pose, EntityDimensions> sizeMap, boolean humanLike, boolean transformed, int skinTypes, float damageReduction, boolean hasArms, float leapModifier, float mobLeapModifier) {
         if (REGISTRY.containsKey(name)) throw new IllegalStateException("this name already exists");
         REGISTRY.put(name, this);
         if (sizeMap == null) {
@@ -50,6 +51,7 @@ public class WerewolfForm {
         this.damageReduction = damageReduction;
         this.hasArms = hasArms;
         this.leapModifier = leapModifier;
+        this.mobLeapModifier = mobLeapModifier;
     }
 
     public boolean isHumanLike() {
@@ -98,5 +100,13 @@ public class WerewolfForm {
 
     public float getLeapModifier() {
         return leapModifier;
+    }
+
+    /**
+     * Leap distance modifier used by mob AI, kept separate from {@link #getLeapModifier()} so mob
+     * leap tuning doesn't also change the player's leap action distance.
+     */
+    public float getMobLeapModifier() {
+        return mobLeapModifier;
     }
 }

@@ -38,6 +38,7 @@ import de.teamlapen.werewolves.entities.goals.FollowAlphaWerewolfGoal;
 import de.teamlapen.werewolves.entities.goals.HowlOnHurtGoal;
 import de.teamlapen.werewolves.entities.goals.WerewolfAttackVillageGoal;
 import de.teamlapen.werewolves.entities.goals.WerewolfDefendVillageGoal;
+import de.teamlapen.werewolves.entities.goals.WerewolfLeapGoal;
 import de.teamlapen.werewolves.entities.minion.WerewolfMinionEntity;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import de.teamlapen.werewolves.util.Helper;
@@ -459,7 +460,7 @@ public abstract class BasicWerewolfEntity extends WerewolfBaseEntity implements 
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new BreakDoorGoal(this, (difficulty) -> difficulty == net.minecraft.world.Difficulty.HARD));//Only break doors on hard difficulty
-        this.goalSelector.addGoal(1, new LeapAtTargetGoal(this, 0.3F + this.getForm().getLeapModifier() * 0.25F));
+        this.goalSelector.addGoal(1, new WerewolfLeapGoal(this, this.getForm().getMobLeapModifier(), 5.0D, 12.0D, 200));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, false));
         this.goalSelector.addGoal(3, new EatToHealGoal<>(this));
         this.goalSelector.addGoal(6, new FollowAlphaWerewolfGoal<>(this, 0.8));
