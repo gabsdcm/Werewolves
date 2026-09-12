@@ -71,9 +71,6 @@ public class BalanceConfig {
         public final ModConfigSpec.DoubleValue human_werewolf_attack_damage;
         public final ModConfigSpec.DoubleValue human_werewolf_speed;
 
-        public final ModConfigSpec.IntValue werewolf_howl_aggro_cooldown;
-        public final ModConfigSpec.DoubleValue werewolf_howl_aggro_radius;
-
         public final ModConfigSpec.DoubleValue alpha_werewolf_max_health;
         public final ModConfigSpec.DoubleValue alpha_werewolf_max_health_pl;
         public final ModConfigSpec.DoubleValue alpha_werewolf_attack_damage;
@@ -109,11 +106,6 @@ public class BalanceConfig {
             human_werewolf_attack_damage = builder.defineInRange("human_werewolf_attack_damage", 3, 0, Double.MAX_VALUE);
             human_werewolf_max_health = builder.defineInRange("human_werewolf_max_health", 30.0, 10, Double.MAX_VALUE);
             human_werewolf_speed = builder.defineInRange("human_werewolf_speed", 0.36, 0.1, 2);
-            builder.pop();
-
-            builder.push("werewolf_howl_aggro");
-            werewolf_howl_aggro_cooldown = builder.comment("Minimum time between two aggro howls of the same werewolf", "In ticks").defineInRange("werewolf_howl_aggro_cooldown", 200, 0, Integer.MAX_VALUE);
-            werewolf_howl_aggro_radius = builder.comment("Radius in which nearby werewolves are aggroed onto the attacker").defineInRange("werewolf_howl_aggro_radius", 16.0, 0, 128);
             builder.pop();
 
             builder.push("alpha_werewolf");
