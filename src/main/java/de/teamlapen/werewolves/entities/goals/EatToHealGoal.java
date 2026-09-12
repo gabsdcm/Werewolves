@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class EatToHealGoal<T extends Mob> extends Goal {
 
     private final T entity;
-    private int cooldown;
+    private int nextEatTick;
     private float healAmount;
     @Nullable
     private Item eatenItem;
@@ -25,10 +25,7 @@ public class EatToHealGoal<T extends Mob> extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.cooldown > 0) {
-            this.cooldown--;
-            return false;
-        }
+        if (this.entity.tickCount < this.nextEatTick) return false;
         if (this.entity.isUsingItem()) return false;
         if (this.entity.getHealth() >= this.entity.getMaxHealth() * WerewolvesConfig.BALANCE.MOBPROPS.werewolf_eat_health_threshold.get()) return false;
         return getOffhandFood() != null;
@@ -56,7 +53,7 @@ public class EatToHealGoal<T extends Mob> extends Goal {
             this.entity.heal(this.healAmount);
         }
         this.entity.stopUsingItem();
-        this.cooldown = WerewolvesConfig.BALANCE.MOBPROPS.werewolf_eat_cooldown.get();
+        this.nextEatTick = this.entity.tickCount + WerewolvesConfig.BALANCE.MOBPROPS.werewolf_eat_cooldown.get();
         this.healAmount = 0;
         this.eatenItem = null;
         this.eatenCount = 0;

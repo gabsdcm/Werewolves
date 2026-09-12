@@ -15,6 +15,7 @@ import de.teamlapen.werewolves.util.DamageHandler;
 import de.teamlapen.werewolves.util.FormHelper;
 import de.teamlapen.werewolves.world.ModDamageSources;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,6 +41,18 @@ public abstract class WerewolfBaseEntity extends VampirismEntity implements IWer
     public WerewolfBaseEntity(EntityType<? extends VampirismEntity> type, Level world, boolean countAsMonsterForSpawn) {
         super(type, world);
         this.countAsMonsterForSpawn = countAsMonsterForSpawn;
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putBoolean("appliedUpgradedBite", this.appliedUpgradedBite);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        this.appliedUpgradedBite = nbt.getBoolean("appliedUpgradedBite");
     }
 
     public static boolean spawnPredicateWerewolf(EntityType<? extends WerewolfBaseEntity> entityType, ServerLevelAccessor world, MobSpawnType spawnReason, BlockPos blockPos, RandomSource random) {
