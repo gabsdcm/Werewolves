@@ -43,7 +43,7 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(REFERENCE.MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, REFERENCE.MODID);
 
-    private static final Set<DeferredHolder<Item, ? extends Item>> WEREWOLVES_TAB_ITEMS = new HashSet<>();
+    private static final Set<DeferredHolder<Item, ? extends Item>> WEREWOLVES_TAB_ITEMS = new LinkedHashSet<>();
     private static final Map<ResourceKey<CreativeModeTab>, Set<DeferredHolder<Item, ? extends Item>>> CREATIVE_TAB_ITEMS = new HashMap<>();
 
     public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB, WResourceLocation.mod("default"));
