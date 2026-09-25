@@ -67,6 +67,7 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(),
                 player.getRepresentingPlayer().getMainHandItem(), true);
         player.syncClawSlot();
+        player.syncClawLevelHandler();
         return true;
     }
 
@@ -119,6 +120,7 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         if (tier == null) {
             return;
         }
+        player.getClawLevelHandler().adoptTier(tier);
         AttributeInstance damage = player.asEntity().getAttribute(Attributes.ATTACK_DAMAGE);
         AttributeInstance speed = player.asEntity().getAttribute(Attributes.ATTACK_SPEED);
         if (damage != null) {

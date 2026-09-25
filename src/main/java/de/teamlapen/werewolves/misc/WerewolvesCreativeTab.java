@@ -117,6 +117,8 @@ public class WerewolvesCreativeTab {
             addItem(WHITE_PELT_CHESTPLATE);
             addItem(WHITE_PELT_LEGGINGS);
             addItem(WHITE_PELT_BOOTS);
+            addItem(CLAW_MOLD);
+            addItem(CLAW_MOLD_CERAMIC);
             addItem(WEREWOLF_CLAW_NORMAL);
             addItem(WEREWOLF_CLAW_ENHANCED);
             addItem(WEREWOLF_CLAW_ULTIMATE);

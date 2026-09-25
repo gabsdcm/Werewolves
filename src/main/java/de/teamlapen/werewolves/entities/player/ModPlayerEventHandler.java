@@ -18,9 +18,11 @@ import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import de.teamlapen.werewolves.entities.werewolf.WerewolfBaseEntity;
 import de.teamlapen.werewolves.mixin.LivingEntityAccessor;
 import de.teamlapen.werewolves.util.Helper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -32,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -39,11 +42,20 @@ import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.living.*;
 import net.neoforged.neoforge.event.entity.player.*;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 public class ModPlayerEventHandler {
+
+    private static final int CLAW_MOLD_HOLD_TICKS = 60;
+    private static final Map<UUID, ClawMoldAttempt> CLAW_MOLD_ATTEMPTS = new HashMap<>();
+
+    private record ClawMoldAttempt(BlockPos pos, long finishAt) {
+    }
 
     @SubscribeEvent
     public void onFootEatenFinish(LivingEntityUseItemEvent.Finish event) {
@@ -154,6 +166,21 @@ public class ModPlayerEventHandler {
     @SubscribeEvent
     public void onItemUseBlock(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
+        boolean clay = event.getLevel().getBlockState(event.getPos()).is(Blocks.CLAY);
+        boolean werewolf = Helper.isWerewolf(player);
+        boolean transformed = werewolf && WerewolfPlayer.get(player).getForm().isTransformed();
+        if (!event.getLevel().isClientSide() && event.getHand() == InteractionHand.MAIN_HAND
+                && player.isShiftKeyDown() && werewolf && transformed && clay) {
+            long gameTime = event.getLevel().getGameTime();
+            ClawMoldAttempt attempt = CLAW_MOLD_ATTEMPTS.get(player.getUUID());
+            if (attempt == null || !attempt.pos().equals(event.getPos())) {
+                attempt = new ClawMoldAttempt(event.getPos().immutable(), gameTime + CLAW_MOLD_HOLD_TICKS);
+            }
+            CLAW_MOLD_ATTEMPTS.put(player.getUUID(), attempt);
+            event.setCancellationResult(InteractionResult.CONSUME);
+            event.setCanceled(true);
+            return;
+        }
         if (player.getItemInHand(event.getHand()).getItem() == ModItems.INJECTION_UN_WEREWOLF.get()) {
             if (event.getLevel().getBlockState(event.getPos()).getBlock() == ModBlocks.V.MED_CHAIR.get()) {
                 ItemStack stack = player.getItemInHand(event.getHand());
@@ -177,6 +204,27 @@ public class ModPlayerEventHandler {
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public void onClawMoldTick(PlayerTickEvent.Post event) {
+        Player player = event.getEntity();
+        if (player.level().isClientSide()) return;
+
+        ClawMoldAttempt attempt = CLAW_MOLD_ATTEMPTS.get(player.getUUID());
+        if (attempt == null || player.level().getGameTime() < attempt.finishAt()) return;
+        CLAW_MOLD_ATTEMPTS.remove(player.getUUID());
+
+        boolean werewolf = Helper.isWerewolf(player);
+        boolean transformed = werewolf && WerewolfPlayer.get(player).getForm().isTransformed();
+        boolean clay = player.level().getBlockState(attempt.pos()).is(Blocks.CLAY);
+        boolean valid = player.isAlive() && player.isShiftKeyDown() && werewolf && transformed && clay
+                && player.distanceToSqr(Vec3.atCenterOf(attempt.pos())) <= 36;
+        if (!valid) return;
+
+        ItemStack mold = ModItems.CLAW_MOLD.get().getDefaultInstance();
+        player.drop(mold, false);
+        player.displayClientMessage(Component.translatable("text.werewolves.claw_mold.obtained"), true);
     }
 
     @SubscribeEvent
@@ -235,6 +283,26 @@ public class ModPlayerEventHandler {
                 source.addEffect(SilverEffect.createSilverEffect(source, WerewolvesConfig.BALANCE.UTIL.silverArmorAttackEffectDuration.get() * sum, 0));
             }
         }
+
+        if (event.getSource().getEntity() instanceof Player player && player != event.getEntity() && Helper.isWerewolf(player)) {
+            WerewolfPlayer werewolf = WerewolfPlayer.get(player);
+            if (!player.level().isClientSide && isUsingClaws(player, werewolf)) {
+                werewolf.addClawProgress(event.getNewDamage() * 0.15D);
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onClawBlockBreak(BlockEvent.BreakEvent event) {
+        Player player = event.getPlayer();
+        if (event.isCanceled() || player.level().isClientSide || player.getAbilities().instabuild || !Helper.isWerewolf(player)) {
+            return;
+        }
+
+        WerewolfPlayer werewolf = WerewolfPlayer.get(player);
+        if (isUsingClaws(player, werewolf)) {
+            werewolf.addClawProgress(0.5D);
+        }
     }
 
     @SubscribeEvent
@@ -284,5 +352,10 @@ public class ModPlayerEventHandler {
                 ModAdvancements.TRIGGER_VAMPIRE_ACTION.get().trigger(serverPlayer, WerewolfActionCriterionTrigger.Action.TOUCH_SILVER);
             }
         }
+    }
+
+    private static boolean isUsingClaws(Player player, WerewolfPlayer werewolf) {
+        return werewolf.getClawSlot().isActive()
+                || (werewolf.getForm().isTransformed() && player.getMainHandItem().isEmpty());
     }
 }
