@@ -2,6 +2,7 @@ package de.teamlapen.werewolves.client.core;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import de.teamlapen.vampirism.entity.player.actions.ActionHandler;
+import de.teamlapen.werewolves.client.gui.ScrollScreen;
 import de.teamlapen.werewolves.core.ModActions;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import de.teamlapen.werewolves.network.ServerboundBiteEventPackage;
@@ -30,16 +31,19 @@ public class ModKeys {
     private static final String LEAP_KEY = "keys.werewolves.leap";
     private static final String BITE_KEY = "keys.werewolves.bite";
     private static final String CLAW_KEY = "keys.werewolves.claw";
+    private static final String SCROLL_KEY = "keys.werewolves.scroll";
 
     private static final KeyMapping LEAP = new KeyMapping(LEAP_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_CONTROL, CATEGORY);
     private static final KeyMapping BITE = new KeyMapping(BITE_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
     private static final KeyMapping CLAW = new KeyMapping(CLAW_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
+    private static final KeyMapping SCROLL = new KeyMapping(SCROLL_KEY, KeyConflictContext.IN_GAME, KeyModifier.NONE, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F7, CATEGORY);
 
     @ApiStatus.Internal
     public static void registerKeyMapping(@Nonnull RegisterKeyMappingsEvent event){
         event.register(LEAP);
         event.register(BITE);
         event.register(CLAW);
+        event.register(SCROLL);
     }
 
     private final ClientEventHandler clientEventHandler;
@@ -88,6 +92,8 @@ public class ModKeys {
                         werewolf.getActionHandler().toggleAction(ModActions.CLAW.get(), new ActionHandler.ActivationContext());
                     }
                 }
+            } else if (key == SCROLL) {
+                Minecraft.getInstance().setScreen(new ScrollScreen());
             }
         });
     }
@@ -99,6 +105,8 @@ public class ModKeys {
             return Optional.of(LEAP);
         } else if (CLAW.consumeClick()) {
             return Optional.of(CLAW);
+        } else if (SCROLL.consumeClick()) {
+            return Optional.of(SCROLL);
         }
         return Optional.empty();
     }
