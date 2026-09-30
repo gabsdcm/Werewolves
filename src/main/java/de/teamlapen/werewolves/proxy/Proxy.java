@@ -8,6 +8,10 @@ import net.minecraft.network.chat.Component;
 
 public interface Proxy extends IInitListener {
 
+    default void displayScrollScreen() {
+
+    }
+
     default void displayWolfsbaneScreen(WolfsbaneDiffuserBlockEntity tile, Component title) {
 
     }

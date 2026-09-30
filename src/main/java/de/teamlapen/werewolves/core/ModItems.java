@@ -65,6 +65,7 @@ public class ModItems {
     }));
     public static final DeferredItem<LiverItem> LIVER = register("liver", LiverItem::new);
     public static final DeferredItem<Item> CRACKED_BONE = register("cracked_bone", () -> new Item(props()));
+    public static final DeferredItem<ScrollItem> SCROLL = register("scroll", ScrollItem::new);
     public static final DeferredItem<UnWerewolfInjectionItem> INJECTION_UN_WEREWOLF = register("injection_un_werewolf", UnWerewolfInjectionItem::new);
     public static final DeferredItem<WerewolfToothItem> WEREWOLF_TOOTH = register("werewolf_tooth", WerewolfToothItem::new);
     public static final DeferredItem<Item> SILVER_NUGGET = register("silver_nugget", () -> new Item(props()));

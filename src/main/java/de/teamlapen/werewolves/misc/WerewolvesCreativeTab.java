@@ -125,6 +125,7 @@ public class WerewolvesCreativeTab {
             addItem(WHITE_PELT);
             addItem(WHITE_PELT_UPGRADE_SMITHING_TEMPLATE);
             addItem(CRACKED_BONE);
+            addItem(SCROLL);
             addItem(WEREWOLF_TOOTH);
             addItem(LIVER);
             addItem(WOLF_BERRIES);

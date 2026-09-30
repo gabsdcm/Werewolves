@@ -5,6 +5,7 @@ import de.teamlapen.vampirism.client.gui.screens.HunterMinionStatsScreen;
 import de.teamlapen.werewolves.blocks.LogBlock;
 import de.teamlapen.werewolves.blocks.entity.WolfsbaneDiffuserBlockEntity;
 import de.teamlapen.werewolves.client.core.*;
+import de.teamlapen.werewolves.client.gui.ScrollScreen;
 import de.teamlapen.werewolves.client.gui.WerewolfMinionAppearanceScreen;
 import de.teamlapen.werewolves.client.gui.WerewolfMinionStatsScreen;
 import de.teamlapen.werewolves.client.gui.WolfsbaneDiffuserScreen;
@@ -27,6 +28,11 @@ public class ClientProxy extends CommonProxy {
                 Sheets.addWoodType(LogBlock.JACARANDA);
             });
         }
+    }
+
+    @Override
+    public void displayScrollScreen() {
+        ScrollScreen.open();
     }
 
     @Override
