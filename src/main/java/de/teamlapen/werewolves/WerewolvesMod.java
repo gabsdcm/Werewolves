@@ -24,6 +24,7 @@ import de.teamlapen.werewolves.core.*;
 import de.teamlapen.werewolves.entities.ModEntityEventHandler;
 import de.teamlapen.werewolves.entities.minion.WerewolfMinionEntity;
 import de.teamlapen.werewolves.entities.player.ModPlayerEventHandler;
+import de.teamlapen.werewolves.entities.player.werewolf.ClawHitEffectHandler;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import de.teamlapen.werewolves.items.WerewolfRefinementItem;
 import de.teamlapen.werewolves.modcompat.guide.WerewolvesGuideBook;
@@ -159,6 +160,7 @@ public class WerewolvesMod {
 
         NeoForge.EVENT_BUS.register(new ModEntityEventHandler());
         NeoForge.EVENT_BUS.register(new ModPlayerEventHandler());
+        NeoForge.EVENT_BUS.register(new ClawHitEffectHandler());
         NeoForge.EVENT_BUS.register(new GeneralEventHandler());
         event.enqueueWork(TerraBlenderCompat::registerBiomeProviderIfPresentUnsafe);
     }

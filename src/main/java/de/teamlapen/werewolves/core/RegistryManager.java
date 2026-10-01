@@ -4,7 +4,6 @@ import de.teamlapen.lib.lib.util.IInitListener;
 import de.teamlapen.werewolves.world.gen.WerewolvesBiomeFeatures;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.ParallelDispatchEvent;
-import net.neoforged.neoforge.common.NeoForge;
 
 @SuppressWarnings("unused")
 public class RegistryManager implements IInitListener {
@@ -32,6 +31,7 @@ public class RegistryManager implements IInitListener {
         ModAttachments.register(bus);
         ModArmorMaterials.register(bus);
         ModAdvancements.register(bus);
+        ModParticles.register(bus);
     }
 
     public RegistryManager(IEventBus modEventBus) {

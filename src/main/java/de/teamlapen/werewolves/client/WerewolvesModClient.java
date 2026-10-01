@@ -50,6 +50,7 @@ public class WerewolvesModClient {
         modbus.addListener(ModScreens::registerScreens);
         modbus.addListener(ModScreens::registerScreenOverlays);
         modbus.addListener(ModItemRenderer::registerColors);
+        modbus.addListener(ModParticleFactories::registerFactories);
 
         NeoForge.EVENT_BUS.register(this.clientEventHandler);
         NeoForge.EVENT_BUS.register(this.modHUDOverlay);
