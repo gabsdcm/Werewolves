@@ -97,11 +97,13 @@ public class ClientEventHandler {
                         Tooltip.create(Component.translatable("gui.vampirism.vampirism_menu.appearance_menu")));
 
                 WerewolfPlayer werewolf = WerewolfPlayer.get(Minecraft.getInstance().player);
-                if (werewolf.getMaxLevel() == werewolf.getLevel())
-                    return;
                 AbstractContainerScreen<?> screen = ((AbstractContainerScreen<?>) event.getScreen());
+                if (werewolf.getMaxLevel() != werewolf.getLevel()) {
+                    ((ScreenAccessor) event.getScreen())
+                            .invokeAddRenderableWidget_werewolves(new ExpBar(screen.getGuiLeft() - 14, screen.getGuiTop()));
+                }
                 ((ScreenAccessor) event.getScreen())
-                        .invokeAddRenderableWidget_werewolves(new ExpBar(screen.getGuiLeft() - 14, screen.getGuiTop()));
+                        .invokeAddRenderableWidget_werewolves(new ExpBar(screen.getGuiLeft(), screen.getGuiTop() - 14, true));
             }
         }
     }

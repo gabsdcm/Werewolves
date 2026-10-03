@@ -114,6 +114,8 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     private WerewolfFormAction lastFormAction;
     @Nonnull
     private final LevelHandler levelHandler = new LevelHandler(this);
+    @Nonnull
+    private final ClawLevelHandler clawLevelHandler = new ClawLevelHandler();
 
     private final Customization customization = new Customization();
 
@@ -370,6 +372,11 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         return levelHandler;
     }
 
+    @Nonnull
+    public ClawLevelHandler getClawLevelHandler() {
+        return clawLevelHandler;
+    }
+
     @Override
     public boolean onEntityAttacked(DamageSource damageSource, float v) {
         return false;
@@ -383,6 +390,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         }
         this.levelHandler.increaseProgress((int) (victim.getMaxHealth() * 0.2));
         this.syncLevelHandler();
+        this.syncClawLevelHandler();
     }
 
     @Override
@@ -395,6 +403,29 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
     public void syncLevelHandler() {
         CompoundTag sync = new CompoundTag();
         sync.put(this.levelHandler.nbtKey(), this.levelHandler.serializeUpdateNBT(this.player.registryAccess()));
+        this.sync(sync, false);
+    }
+
+    public void addClawProgress(double amount) {
+        if (!isRemote()) {
+            this.clawLevelHandler.addProgress(amount);
+            this.syncClawLevelHandler();
+        }
+    }
+
+    public int setClawLevel(int level) {
+        if (isRemote()) {
+            return this.clawLevelHandler.getLevel();
+        }
+        int result = this.clawLevelHandler.setLevel(level);
+        ModActions.CLAW.get().refreshModifiers(this);
+        this.syncClawLevelHandler();
+        return result;
+    }
+
+    public void syncClawLevelHandler() {
+        CompoundTag sync = new CompoundTag();
+        sync.put(this.clawLevelHandler.nbtKey(), this.clawLevelHandler.serializeUpdateNBT(this.player.registryAccess()));
         this.sync(sync, false);
     }
 
@@ -471,7 +502,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
             ScoreboardUtil.updateScoreboard(this.player, WUtils.WEREWOLF_LEVEL_CRITERIA, newLevel);
             LevelAttributeModifier.applyModifier(player, Attributes.MOVEMENT_SPEED, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
             LevelAttributeModifier.applyModifier(player, Attributes.ARMOR_TOUGHNESS, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
-            LevelAttributeModifier.applyModifier(player, Attributes.ATTACK_DAMAGE, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_damage.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
+            LevelAttributeModifier.applyModifier(player, Attributes.ATTACK_DAMAGE, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_damage.get(), 0.5, AttributeModifier.Operation.ADD_VALUE, false);
             if (newLevel <= 0) {
                 this.actionHandler.resetTimers();
                 this.skillHandler.disableAllSkills();
@@ -567,6 +598,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         compound.put(this.skillHandler.nbtKey(), this.skillHandler.serializeNBT(provider));
         compound.put(this.actionHandler.nbtKey(), this.actionHandler.serializeNBT(provider));
         compound.put(this.levelHandler.nbtKey(), this.levelHandler.serializeNBT(provider));
+        compound.put(this.clawLevelHandler.nbtKey(), this.clawLevelHandler.serializeNBT(provider));
         compound.put(this.customization.nbtKey(), this.customization.serializeNBT(provider));
         compound.putString("form", this.form.getName());
         if (this.lastFormAction != null) {
@@ -585,6 +617,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         nbt.put(this.skillHandler.nbtKey(), this.skillHandler.serializeUpdateNBT(provider));
         nbt.put(this.actionHandler.nbtKey(), this.actionHandler.serializeUpdateNBT(provider));
         nbt.put(this.levelHandler.nbtKey(), this.levelHandler.serializeUpdateNBT(provider));
+        nbt.put(this.clawLevelHandler.nbtKey(), this.clawLevelHandler.serializeUpdateNBT(provider));
         nbt.put(this.customization.nbtKey(), this.customization.serializeUpdateNBT(provider));
         nbt.putString("form", this.form.getName());
         nbt.putInt("biteTicks", this.specialAttributes.biteTicks);
@@ -600,6 +633,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         this.skillHandler.deserializeNBT(provider, nbt.getCompound(this.skillHandler.nbtKey()));
         this.actionHandler.deserializeNBT(provider, nbt.getCompound(this.actionHandler.nbtKey()));
         this.levelHandler.deserializeNBT(provider, nbt.getCompound(this.levelHandler.nbtKey()));
+        this.clawLevelHandler.deserializeNBT(provider, nbt.getCompound(this.clawLevelHandler.nbtKey()));
         this.customization.deserializeNBT(provider, nbt.getCompound(this.customization.nbtKey()));
         if (NBTHelper.containsString(nbt, "lastFormAction")) {
             this.lastFormAction = ((WerewolfFormAction) RegUtil.getAction(ResourceLocation.parse(nbt.getString("lastFormAction"))));
@@ -618,6 +652,9 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         this.skillHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.skillHandler.nbtKey()));
         this.actionHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.actionHandler.nbtKey()));
         this.levelHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.levelHandler.nbtKey()));
+        if (nbt.contains(this.clawLevelHandler.nbtKey())) {
+            this.clawLevelHandler.deserializeUpdateNBT(provider, nbt.getCompound(this.clawLevelHandler.nbtKey()));
+        }
         this.customization.deserializeUpdateNBT(provider, nbt.getCompound(this.customization.nbtKey()));
         if (NBTHelper.containsString(nbt, "form")) {
             this.switchForm(form);
