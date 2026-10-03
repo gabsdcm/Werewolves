@@ -170,6 +170,10 @@ public class RecipeGenerator extends RecipeProvider {
         ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.WEREWOLF_CLAW_ENHANCED.get()).define('C', ModItems.WEREWOLF_CLAW_NORMAL.get()).define('P', dark_pelt).define('S', silver_ingot).pattern("S S").pattern("P P").pattern("C C").unlockedBy("has_werewolf_claw", has(ModItems.WEREWOLF_CLAW_NORMAL.get())).unlockedBy("has_dark_pelt", has(dark_pelt)).save(consumer);
         // WEREWOLF_CLAW_ULTIMATE has no craft recipe by design - it is obtainable only as a loot drop from alpha werewolves.
 
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.CLAW_MOLD.get()), RecipeCategory.MISC, ModItems.CLAW_MOLD_CERAMIC.get(), 0.1f, 200)
+                .unlockedBy("has_claw_mold", has(ModItems.CLAW_MOLD.get()))
+                .save(consumer, modId("claw_mold_ceramic"));
+
         copySmithingTemplate(consumer, ModItems.WHITE_PELT_UPGRADE_SMITHING_TEMPLATE.get(), ModItems.WEREWOLF_TOOTH.get());
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.WOLFSBANE_FINDER.get()).pattern("XXX").pattern("XYX").pattern("ZAZ").define('X', silver_ingot).define('Y', wolfsbane).define('Z', planks).define('A', Tags.Items.DUSTS_REDSTONE).unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE)).unlockedBy("has_silver_ingot", has(silver_ingot)).save(consumer);
     }
