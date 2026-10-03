@@ -42,6 +42,7 @@ public class ModCommands {
                             .then(WerewolfEyeCommand.register())
                             .then(WerewolfSkinCommand.register())
                             .then(WerewolfGlowingEyeCommand.register())
+                            .then(WerewolfClawCommand.register())
             );
         }
 
