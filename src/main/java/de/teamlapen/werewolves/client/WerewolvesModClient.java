@@ -3,6 +3,7 @@ package de.teamlapen.werewolves.client;
 import de.teamlapen.lib.lib.util.IInitListener;
 import de.teamlapen.werewolves.WerewolvesMod;
 import de.teamlapen.werewolves.client.core.*;
+import de.teamlapen.werewolves.client.render.StunStarsRenderer;
 import de.teamlapen.werewolves.core.RegistryManager;
 import de.teamlapen.werewolves.proxy.ClientProxy;
 import de.teamlapen.werewolves.proxy.Proxy;
@@ -54,6 +55,7 @@ public class WerewolvesModClient {
 
         NeoForge.EVENT_BUS.register(this.clientEventHandler);
         NeoForge.EVENT_BUS.register(this.modHUDOverlay);
+        NeoForge.EVENT_BUS.register(new StunStarsRenderer());
         NeoForge.EVENT_BUS.register(new ModKeys(this.clientEventHandler));
 
     }

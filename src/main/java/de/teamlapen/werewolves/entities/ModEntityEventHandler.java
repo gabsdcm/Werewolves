@@ -10,6 +10,7 @@ import de.teamlapen.werewolves.api.entities.werewolf.WerewolfTransformable;
 import de.teamlapen.werewolves.api.items.ISilverItem;
 import de.teamlapen.werewolves.config.WerewolvesConfig;
 import de.teamlapen.werewolves.core.ModDamageTypes;
+import de.teamlapen.werewolves.core.ModEffects;
 import de.teamlapen.werewolves.core.ModSkills;
 import de.teamlapen.werewolves.core.ModTags;
 import de.teamlapen.werewolves.effects.SilverEffect;
@@ -23,11 +24,14 @@ import de.teamlapen.werewolves.util.FormHelper;
 import de.teamlapen.werewolves.util.Helper;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -48,6 +52,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -167,6 +172,46 @@ public class ModEntityEventHandler {
     public void onWerewolfWeakeningEffectApplied(MobEffectEvent.Applicable event) {
         if (event.getEffectInstance().getEffect() instanceof WerewolfWeakeningEffect && !Helper.isWerewolf(event.getEntity())) {
             event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onStunAdded(MobEffectEvent.Added event) {
+        MobEffectInstance instance = event.getEffectInstance();
+        LivingEntity entity = event.getEntity();
+        if (instance.is(ModEffects.STUN) && entity.level() instanceof ServerLevel level) {
+            level.getChunkSource().broadcast(entity, new ClientboundUpdateMobEffectPacket(entity.getId(), instance, false));
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onStunRemoved(MobEffectEvent.Remove event) {
+        if (event.getEffect().is(ModEffects.STUN.getKey())) {
+            broadcastStunRemoval(event.getEntity());
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onStunExpired(MobEffectEvent.Expired event) {
+        MobEffectInstance instance = event.getEffectInstance();
+        if (instance != null && instance.is(ModEffects.STUN)) {
+            broadcastStunRemoval(event.getEntity());
+        }
+    }
+
+    @SubscribeEvent
+    public void onStartTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof LivingEntity target && event.getEntity() instanceof ServerPlayer player) {
+            MobEffectInstance stun = target.getEffect(ModEffects.STUN);
+            if (stun != null) {
+                player.connection.send(new ClientboundUpdateMobEffectPacket(target.getId(), stun, false));
+            }
+        }
+    }
+
+    private static void broadcastStunRemoval(LivingEntity entity) {
+        if (entity.level() instanceof ServerLevel level) {
+            level.getChunkSource().broadcast(entity, new ClientboundRemoveMobEffectPacket(entity.getId(), ModEffects.STUN));
         }
     }
 
