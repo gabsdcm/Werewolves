@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,10 +64,11 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
             return false;
         }
         slot.setActive(true);
-        applyModifiers(player);
         player.checkToolDamage(player.getRepresentingPlayer().getMainHandItem(),
                 player.getRepresentingPlayer().getMainHandItem(), true);
+        applyModifiers(player);
         player.syncClawSlot();
+        player.syncClawLevelHandler();
         return true;
     }
 
@@ -119,17 +121,39 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         if (tier == null) {
             return;
         }
+        player.getClawLevelHandler().adoptTier(tier);
+        ItemStack clawStack = player.getClawSlot().getStack();
         AttributeInstance damage = player.asEntity().getAttribute(Attributes.ATTACK_DAMAGE);
         AttributeInstance speed = player.asEntity().getAttribute(Attributes.ATTACK_SPEED);
+        boolean selectedItemIsClaw = isSelectedClaw(player);
         if (damage != null) {
+            if (selectedItemIsClaw) {
+                // The claw is normally stored in its custom slot. Remove a possible
+                // vanilla claw modifier first so its damage is not counted twice.
+                damage.removeModifier(Item.BASE_ATTACK_DAMAGE_ID);
+            }
             damage.removeModifier(damageId());
+            double rawClawDamage = WerewolfClawItem.calculateAttackDamage(
+                    clawStack,
+                    player.getClawLevelHandler().getLevel(),
+                    player.getClawLevelHandler().getMaxLevel());
             damage.addTransientModifier(
-                    new AttributeModifier(damageId(), getAttackDamage(tier), AttributeModifier.Operation.ADD_VALUE));
+                    new AttributeModifier(damageId(), rawClawDamage,
+                            AttributeModifier.Operation.ADD_VALUE));
         }
         if (speed != null) {
+            if (selectedItemIsClaw) {
+                speed.removeModifier(Item.BASE_ATTACK_SPEED_ID);
+            }
             speed.removeModifier(speedId());
             speed.addTransientModifier(
-                    new AttributeModifier(speedId(), getAttackSpeed(tier), AttributeModifier.Operation.ADD_VALUE));
+                    new AttributeModifier(speedId(), WerewolfClawItem.getAttackSpeedModifier(tier), AttributeModifier.Operation.ADD_VALUE));
+        }
+    }
+
+    public void refreshModifiers(WerewolfPlayer player) {
+        if (player.getClawSlot().isActive()) {
+            applyModifiers(player);
         }
     }
 
@@ -169,20 +193,9 @@ public class ClawAction extends DefaultWerewolfAction implements ILastingAction<
         return this.speedId;
     }
 
-    private static double getAttackDamage(IItemWithTier.TIER tier) {
-        return switch (tier) {
-            case NORMAL -> WerewolvesConfig.BALANCE.SKILLS.claw_normal_attack_damage.get();
-            case ENHANCED -> WerewolvesConfig.BALANCE.SKILLS.claw_enhanced_attack_damage.get();
-            case ULTIMATE -> WerewolvesConfig.BALANCE.SKILLS.claw_ultimate_attack_damage.get();
-        };
-    }
-
-    private static double getAttackSpeed(IItemWithTier.TIER tier) {
-        return switch (tier) {
-            case NORMAL -> WerewolvesConfig.BALANCE.SKILLS.claw_normal_attack_speed.get();
-            case ENHANCED -> WerewolvesConfig.BALANCE.SKILLS.claw_enhanced_attack_speed.get();
-            case ULTIMATE -> WerewolvesConfig.BALANCE.SKILLS.claw_ultimate_attack_speed.get();
-        };
+    private static boolean isSelectedClaw(WerewolfPlayer player) {
+        Inventory inventory = player.getRepresentingPlayer().getInventory();
+        return inventory.items.get(inventory.selected).getItem() instanceof WerewolfClawItem;
     }
 
     private static int findBestClawIndex(Inventory inventory, ItemStack current) {

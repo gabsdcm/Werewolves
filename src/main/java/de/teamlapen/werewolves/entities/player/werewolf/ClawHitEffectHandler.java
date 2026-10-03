@@ -40,6 +40,12 @@ public class ClawHitEffectHandler {
             return;
         }
 
+        WerewolfPlayer werewolf = WerewolfPlayer.get(attacker);
+        if (WerewolfClawItem.recordDamage(werewolf.getClawSlot().getStack(), event.getNewDamage())) {
+            werewolf.syncClawSlot();
+            ModActions.CLAW.get().refreshModifiers(werewolf);
+        }
+
         boolean leftSide = NEXT_LEFT_BY_PLAYER.merge(attacker.getUUID(), true, (previous, ignored) -> !previous);
         Vec3 particlePosition = findSurfacePosition(target, attacker, leftSide);
         serverLevel.sendParticles(
@@ -52,6 +58,17 @@ public class ClawHitEffectHandler {
                 0.0D,
                 0.0D,
                 0.0D);
+    }
+
+    /**
+     * Looting the active claw grants by nature; the claw is never actually enchanted.
+     */
+    public static int getClawLootingLevel(LivingEntity entity) {
+        if (entity instanceof Player player && isClawAttack(player)) {
+            return WerewolfClawItem.getLootingLevel(
+                    ((WerewolfClawItem) WerewolfPlayer.get(player).getClawSlot().getStack().getItem()).getVampirismTier());
+        }
+        return 0;
     }
 
     private static Vec3 findSurfacePosition(LivingEntity target, Player attacker, boolean leftSide) {
