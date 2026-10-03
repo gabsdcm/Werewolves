@@ -6,6 +6,7 @@
   "mixins": [
     "ArmorSlotMixin",
     "BlockFamiliesAccessor",
+    "EnchantmentHelperMixin",
     "FoodStatsAccessor",
     "GoalSelectorAccessor",
     "InventoryContainerMenuMixin",
