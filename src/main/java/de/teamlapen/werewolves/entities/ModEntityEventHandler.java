@@ -24,6 +24,7 @@ import de.teamlapen.werewolves.util.FormHelper;
 import de.teamlapen.werewolves.util.Helper;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -53,9 +54,11 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -67,6 +70,8 @@ public class ModEntityEventHandler {
     private static final Predicate<LivingEntity> nonWerewolfCheck = entity -> !Helper.isWerewolf(entity);
     private static final Object2BooleanMap<String> entityAIReplacementWarnMap = new Object2BooleanArrayMap<>();
     private static final UUID ARMOR_REDUCTION = UUID.fromString("5b7612e9-1847-435c-b4eb-a455af4ce8c7");
+    private static final List<DeferredHolder<MobEffect, ? extends MobEffect>> TRACKER_SYNCED_EFFECTS =
+            List.of(ModEffects.STUN, ModEffects.BLEEDING);
 
     @SubscribeEvent
     public void onEntityAttacked(AttackEntityEvent event) {
@@ -176,42 +181,48 @@ public class ModEntityEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onStunAdded(MobEffectEvent.Added event) {
+    public void onTrackerSyncedEffectAdded(MobEffectEvent.Added event) {
         MobEffectInstance instance = event.getEffectInstance();
         LivingEntity entity = event.getEntity();
-        if (instance.is(ModEffects.STUN) && entity.level() instanceof ServerLevel level) {
+        if (isTrackerSynced(instance.getEffect()) && entity.level() instanceof ServerLevel level) {
             level.getChunkSource().broadcast(entity, new ClientboundUpdateMobEffectPacket(entity.getId(), instance, false));
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onStunRemoved(MobEffectEvent.Remove event) {
-        if (event.getEffect().is(ModEffects.STUN.getKey())) {
-            broadcastStunRemoval(event.getEntity());
+    public void onTrackerSyncedEffectRemoved(MobEffectEvent.Remove event) {
+        if (isTrackerSynced(event.getEffect())) {
+            broadcastEffectRemoval(event.getEntity(), event.getEffect());
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onStunExpired(MobEffectEvent.Expired event) {
+    public void onTrackerSyncedEffectExpired(MobEffectEvent.Expired event) {
         MobEffectInstance instance = event.getEffectInstance();
-        if (instance != null && instance.is(ModEffects.STUN)) {
-            broadcastStunRemoval(event.getEntity());
+        if (instance != null && isTrackerSynced(instance.getEffect())) {
+            broadcastEffectRemoval(event.getEntity(), instance.getEffect());
         }
     }
 
     @SubscribeEvent
     public void onStartTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof LivingEntity target && event.getEntity() instanceof ServerPlayer player) {
-            MobEffectInstance stun = target.getEffect(ModEffects.STUN);
-            if (stun != null) {
-                player.connection.send(new ClientboundUpdateMobEffectPacket(target.getId(), stun, false));
+            for (DeferredHolder<MobEffect, ? extends MobEffect> effect : TRACKER_SYNCED_EFFECTS) {
+                MobEffectInstance instance = target.getEffect(effect);
+                if (instance != null) {
+                    player.connection.send(new ClientboundUpdateMobEffectPacket(target.getId(), instance, false));
+                }
             }
         }
     }
 
-    private static void broadcastStunRemoval(LivingEntity entity) {
+    private static boolean isTrackerSynced(Holder<MobEffect> effect) {
+        return TRACKER_SYNCED_EFFECTS.stream().anyMatch(synced -> effect.is(synced.getKey()));
+    }
+
+    private static void broadcastEffectRemoval(LivingEntity entity, Holder<MobEffect> effect) {
         if (entity.level() instanceof ServerLevel level) {
-            level.getChunkSource().broadcast(entity, new ClientboundRemoveMobEffectPacket(entity.getId(), ModEffects.STUN));
+            level.getChunkSource().broadcast(entity, new ClientboundRemoveMobEffectPacket(entity.getId(), effect));
         }
     }
 

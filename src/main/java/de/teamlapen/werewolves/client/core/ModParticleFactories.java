@@ -1,5 +1,6 @@
 package de.teamlapen.werewolves.client.core;
 
+import de.teamlapen.werewolves.client.particle.BleedingDropParticle;
 import de.teamlapen.werewolves.client.particle.ClawHitParticle;
 import de.teamlapen.werewolves.core.ModParticles;
 import net.neoforged.api.distmarker.Dist;
@@ -15,5 +16,6 @@ public final class ModParticleFactories {
 
     public static void registerFactories(@NotNull RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.WEREWOLF_CLAW_HIT.get(), ClawHitParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.BLEEDING_DROP.get(), BleedingDropParticle.Provider::new);
     }
 }
