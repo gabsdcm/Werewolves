@@ -16,6 +16,9 @@ public final class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> WEREWOLF_CLAW_HIT =
             PARTICLE_TYPES.register("werewolf_claw_hit", () -> new SimpleParticleType(true));
 
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> WEREWOLF_CLAW_SHARPEN =
+            PARTICLE_TYPES.register("werewolf_claw_sharpen", () -> new SimpleParticleType(true));
+
     private ModParticles() {
     }
 

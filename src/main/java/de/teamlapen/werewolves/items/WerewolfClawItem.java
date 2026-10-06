@@ -152,6 +152,27 @@ public class WerewolfClawItem extends Item implements IFactionLevelItem<IWerewol
         return true;
     }
 
+    /**
+     * Removes accumulated wear from the claw.
+     *
+     * @return true if the claw was worn and has been changed
+     */
+    public static boolean sharpen(@NotNull ItemStack stack, double wearRemoved) {
+        if (!(stack.getItem() instanceof WerewolfClawItem claw) || wearRemoved <= 0.0D || !isWorn(stack)) {
+            return false;
+        }
+        CompoundTag data = getClawData(stack);
+        double newDamage = Math.max(0.0D, getDamageCaused(stack) - wearRemoved);
+        data.putDouble(DAMAGE_CAUSED_KEY, newDamage);
+        data.putString(SHARPNESS_KEY, sharpnessForDamage(newDamage, getWearLimit(claw.tier)).name());
+        saveClawData(stack, data);
+        return true;
+    }
+
+    public static boolean isWorn(@NotNull ItemStack stack) {
+        return stack.getItem() instanceof WerewolfClawItem && getDamageCaused(stack) > 0.0D;
+    }
+
     private static @NotNull Sharpness sharpnessForDamage(double damage, int limit) {
         double progress = limit <= 0 ? 1.0D : Math.min(1.0D, damage / limit);
         // Uniform thresholds: Sharp <25%, Worn >=25%, Used >=50%, Dull >=75%, Blunt >=100%.

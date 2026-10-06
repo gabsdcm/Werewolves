@@ -15,5 +15,6 @@ public final class ModParticleFactories {
 
     public static void registerFactories(@NotNull RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.WEREWOLF_CLAW_HIT.get(), ClawHitParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.WEREWOLF_CLAW_SHARPEN.get(), ClawHitParticle.Provider::new);
     }
 }

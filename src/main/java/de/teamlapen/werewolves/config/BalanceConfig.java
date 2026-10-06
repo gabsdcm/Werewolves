@@ -160,6 +160,9 @@ public class BalanceConfig {
         //claw action
         public final ModConfigSpec.BooleanValue claw_enabled;
         public final ModConfigSpec.IntValue claw_cooldown;
+        public final ModConfigSpec.IntValue claw_sharpen_cycle_ticks;
+        public final ModConfigSpec.DoubleValue claw_sharpen_stonecutter_speed;
+        public final ModConfigSpec.DoubleValue claw_sharpen_wear_removed;
 
         //sense action
         public final ModConfigSpec.BooleanValue sense_enabled;
@@ -295,6 +298,9 @@ public class BalanceConfig {
             builder.push("claw");
             this.claw_enabled = builder.define("claw_enabled", true);
             this.claw_cooldown = builder.comment("In seconds").defineInRange("claw_cooldown", 3, 0, Integer.MAX_VALUE);
+            this.claw_sharpen_cycle_ticks = builder.comment("Ticks of one sharpening animation cycle on plain stone").defineInRange("claw_sharpen_cycle_ticks", 12, 1, Integer.MAX_VALUE);
+            this.claw_sharpen_stonecutter_speed = builder.comment("Sharpening speed multiplier on a stonecutter").defineInRange("claw_sharpen_stonecutter_speed", 2d, 1, 100);
+            this.claw_sharpen_wear_removed = builder.comment("Claw wear removed per finished sharpening cycle, in damage dealt").defineInRange("claw_sharpen_wear_removed", 15d, 0, Double.MAX_VALUE);
             builder.pop();
 
             builder.push("sense");
