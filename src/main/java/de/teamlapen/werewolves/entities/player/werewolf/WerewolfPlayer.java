@@ -473,10 +473,10 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
                     if (this.skillHandler.isRefinementEquipped(ModRefinements.STUN_BITE.get())) {
                         duration += WerewolvesConfig.BALANCE.REFINEMENTS.stun_bite_duration_extend.get();
                     }
-                    entity.addEffect(new MobEffectInstance(ModEffects.STUN, duration));
+                    entity.addEffect(new MobEffectInstance(ModEffects.STUN, duration, 0, false, false, true));
                 }
                 if (this.skillHandler.isSkillEnabled(ModSkills.BLEEDING_BITE.get())) {
-                    entity.addEffect(new MobEffectInstance(ModEffects.BLEEDING, WerewolvesConfig.BALANCE.SKILLS.bleeding_bite_duration.get(), this.skillHandler.isRefinementEquipped(ModRefinements.BLEEDING_BITE.get()) ? 3 : 0));
+                    entity.addEffect(new MobEffectInstance(ModEffects.BLEEDING, WerewolvesConfig.BALANCE.SKILLS.bleeding_bite_duration.get(), this.skillHandler.isRefinementEquipped(ModRefinements.BLEEDING_BITE.get()) ? 3 : 0, false, false, true));
                 }
             }
             this.sync(NBTHelper.nbtWith(nbt -> nbt.putInt("biteTicks", this.specialAttributes.biteTicks)), false);
@@ -501,7 +501,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
         if (!isRemote()) {
             ScoreboardUtil.updateScoreboard(this.player, WUtils.WEREWOLF_LEVEL_CRITERIA, newLevel);
             LevelAttributeModifier.applyModifier(player, Attributes.MOVEMENT_SPEED, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
-            LevelAttributeModifier.applyModifier(player, Attributes.ARMOR_TOUGHNESS, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
+            LevelAttributeModifier.applyModifier(player, Attributes.ARMOR_TOUGHNESS, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_armor_toughness.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
             LevelAttributeModifier.applyModifier(player, Attributes.ATTACK_DAMAGE, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_damage.get(), 0.5, AttributeModifier.Operation.ADD_VALUE, false);
             if (newLevel <= 0) {
                 this.actionHandler.resetTimers();
