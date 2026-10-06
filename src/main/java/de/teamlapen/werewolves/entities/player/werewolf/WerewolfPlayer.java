@@ -457,7 +457,7 @@ public class WerewolfPlayer extends FactionBasePlayer<IWerewolfPlayer> implement
             ScoreboardUtil.updateScoreboard(this.player, WUtils.WEREWOLF_LEVEL_CRITERIA, newLevel);
             LevelAttributeModifier.applyModifier(player, Attributes.MOVEMENT_SPEED, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
             LevelAttributeModifier.applyModifier(player, Attributes.ARMOR_TOUGHNESS, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_speed_amount.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
-            LevelAttributeModifier.applyModifier(player, Attributes.ATTACK_DAMAGE, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_damage.get(), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
+            LevelAttributeModifier.applyModifier(player, Attributes.ATTACK_DAMAGE, "Werewolf", newLevel, getMaxLevel(), WerewolvesConfig.BALANCE.PLAYER.werewolf_damage.get(), 0.5, AttributeModifier.Operation.ADD_VALUE, false);
             if (newLevel <= 0) {
                 this.actionHandler.resetTimers();
                 this.skillHandler.disableAllSkills();
