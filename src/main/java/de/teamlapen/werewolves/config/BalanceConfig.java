@@ -298,8 +298,8 @@ public class BalanceConfig {
             builder.push("claw");
             this.claw_enabled = builder.define("claw_enabled", true);
             this.claw_cooldown = builder.comment("In seconds").defineInRange("claw_cooldown", 3, 0, Integer.MAX_VALUE);
-            this.claw_sharpen_cycle_ticks = builder.comment("Ticks of one sharpening animation cycle on plain stone").defineInRange("claw_sharpen_cycle_ticks", 12, 1, Integer.MAX_VALUE);
-            this.claw_sharpen_stonecutter_speed = builder.comment("Sharpening speed multiplier on a stonecutter").defineInRange("claw_sharpen_stonecutter_speed", 2d, 1, 100);
+            this.claw_sharpen_cycle_ticks = builder.comment("Ticks of one sharpening animation cycle on plain stone").defineInRange("claw_sharpen_cycle_ticks", 30, 1, Integer.MAX_VALUE);
+            this.claw_sharpen_stonecutter_speed = builder.comment("Sharpening speed multiplier on a stonecutter").defineInRange("claw_sharpen_stonecutter_speed", 1.5d, 1, 100);
             this.claw_sharpen_wear_removed = builder.comment("Claw wear removed per finished sharpening cycle, in damage dealt").defineInRange("claw_sharpen_wear_removed", 15d, 0, Double.MAX_VALUE);
             builder.pop();
 

@@ -30,9 +30,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 public class ClawSharpeningHandler {
 
     private static final SoundEvent SHARPEN_SOUND = SoundEvents.GRINDSTONE_USE;
-    private static final int SESSION_TIMEOUT_TICKS = 6;
+    private static final int SESSION_TIMEOUT_TICKS = 12;
     private static final double MAX_DISTANCE_SQR = 4.5D * 4.5D;
-    private static final int PARTICLE_COUNT = 2;
+    private static final int PARTICLE_COUNT = 3;
     private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @SubscribeEvent
