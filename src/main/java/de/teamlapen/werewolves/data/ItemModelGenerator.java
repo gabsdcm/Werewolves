@@ -97,6 +97,7 @@ public class ItemModelGenerator extends BaseItemModelGenerator {
             add(ModItems.WEREWOLF_CLAW_ULTIMATE);
             add(ModItems.CLAW_MOLD);
             add(ModItems.CLAW_MOLD_CERAMIC);
+            add(ModItems.LUNAR_CLOCK);
         }};
         Set<Supplier<? extends Block>> blockLayer = new HashSet<>() {{
             add(ModBlocks.WOLFSBANE);

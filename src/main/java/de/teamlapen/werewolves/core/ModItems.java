@@ -129,6 +129,7 @@ public class ModItems {
     public static final DeferredItem<Item> CLAW_MOLD_CERAMIC = register("claw_mold_ceramic", () -> new Item(props()));
     public static final DeferredItem<SmithingTemplateItem> WHITE_PELT_UPGRADE_SMITHING_TEMPLATE = register("white_pelt_upgrade_smithing_template", ModSmithingTemplates::createWhitePeltUpgradeTemplate);
     public static final DeferredItem<Item> WOLFSBANE_FINDER = register("wolfsbane_finder", () -> new Item(props().rarity(Rarity.RARE)));
+    public static final DeferredItem<Item> LUNAR_CLOCK = register("lunar_clock", () -> new Item(props()));
 
 
     public static class V {

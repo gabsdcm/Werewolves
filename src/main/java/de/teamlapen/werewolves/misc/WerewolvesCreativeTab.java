@@ -141,6 +141,7 @@ public class WerewolvesCreativeTab {
             addItem(WOLFSBANE_DIFFUSER_CORE);
             addItem(WOLFSBANE_DIFFUSER_CORE_IMPROVED);
             addItem(WOLFSBANE_FINDER);
+            addItem(LUNAR_CLOCK);
         }
     }
 }
